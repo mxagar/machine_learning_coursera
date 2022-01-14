@@ -136,8 +136,66 @@ theta1 = temp1
 ```
 
 Note that:
-- If we are in a local minimum, the derivative is 0, thus, parameters remain unchanged
-- As gradient descent runs, we should have smaller gradient values, thus smaller steps
+- If we are in a local minimum, the derivative is 0, thus, parameters remain unchanged, reached that point.
+- Indeed, for the general case, the gradient descent algorithm is susceptible to falling into local optima.
+- As gradient descent runs, we should have smaller gradient values, thus smaller steps.
+- A fixed `alpha` value leads also to optima, we don't need to change it really.
 
 ### 3.2 Gradient Descent for Linear Regression
 
+The only key term to remains to be obtained is the partial derivative.
+
+Given:
+
+$J(\theta_0,\theta_1) = \frac{1}{2 m} \sum_{i=1}^{m}(h_{\theta}(x^{(i)}) - y^{(i)})^2$
+
+$J(\theta_0,\theta_1) = \frac{1}{2 m} \sum_{i=1}^{m}(\theta_0 + \theta_1 x^{(i)} - y^{(i)})^2$
+
+We can easily compute:
+
+$\frac{\partial}{\partial \theta_0} J(\theta_0,\theta_1) = \frac{1}{m} \sum_{i=1}^{m}(\theta_0 + \theta_1 x^{(i)} - y^{(i)})$
+
+$\frac{\partial}{\partial \theta_1} J(\theta_0,\theta_1) = \frac{1}{m} \sum_{i=1}^{m}(\theta_0 + \theta_1 x^{(i)} - y^{(i)})x^{(i)}$
+
+Now, we could simply plug these terms to our algorithm!
+
+Even though in the general case the cost function might have many local optima, for the linear regression we will have a unique optimum. That is so because the cost function for linear regression is **convex**.
+
+Gradient descent can be:
+
+- **Batch gradient descent**: all $m$ samples are taken into consideration to compute the gradient; in other words, what we have done above. It is considered to be an epoch when a single derivative computation with all samples is done.
+- **Stochastic gradient descent**: a unique random sample is taken into consideration to computer the gradient; that is common when processing the gradient of all samples is very expensive, e.g., with convolutional neural networks that work on images. It is considered to be an epoch when all samples have been independently processed.
+- **Mini-batch gradient descent**: mini-batches of samples are used instead of all $m$ samples. That is something between the two previous approaches. The term `batch_size` commonly used in deep learning refers to the size of that mini-batch. If `batch_size = 1`, we assume we have stochastic gradient descent.
+
+**Important remark**: It is actually possible to obtain the normal equations of the linear regression without the need of running the gradient descent. However, gradient descent is applied usually for large datasets, because it is more stable. Additionally, gradient descent is necessary when the closed form of $J$ is unknown.
+
+## 4. Linear Algebra Review
+
+I will not extensively make notes in this section, it is ver basic algebra.
+
+Some Octave/Matlab code is shown. In order to install the Octave kernel for Jupyter:
+
+```bash
+brew install octave
+conda config --add channels conda-forge
+conda install -c conda-forge octave_kernel
+# shift-tab doc
+conda install texinfo
+```
+
+See the notebook `01_0_LinearAlgebra.ipynb`.
+
+Covered topics and notation:
+- Matrices (n rows x m columns), vectors (n x 1 rows)
+  - A_ij: element in row i and column j from matrix A
+- Addition and Scalar Multiplication
+- Matrix Vector Multiplication
+  - Linear models can be written in matrix notation: $h = X \theta$
+- Matrix Matrix Multiplication
+- Matrix Multiplication Properties
+   - Non-commutative: $A \times B \neq B \times A$
+   - Associative: $(A \times B) \times C = A \times (B \times C)$
+   - Identity matrix: $I \times A = A$
+- Inverse and Transpose
+  - Only square matrices can be inverted.
+  - (Square) Matrices that cannot be inverted are called singular.
