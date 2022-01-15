@@ -12,9 +12,18 @@ Overview of contents:
    - What is Machine Learning?
    - Supervised Learning
    - Unsupervised Learning
-2. Linear Regression: Model ans Cost Function
+2. Linear Regression with One Variable: Model ans Cost Function
    - Linear Regression Model
    - Cost Function
+   - Contour Plots of the Cost Function
+3. Linear Regression: Parameter Learning
+    - Gradient Descent
+    - Gradient Descent for Linear Regression
+4. Linear Algebra Review
+5. Linear Regression with Multiple Variables
+   - Multivariate Linear Regression
+   - Computing Parameters Analytically
+6. Octave/Matlab Tutorial
 
 ## 1. Introduction
 
@@ -58,7 +67,7 @@ Some notable unsupervised learning methods:
 - Dimensionality Reduction
 - The Cocktail-party problem: two people speaking simultaneously, two microphones hear the speeches from different locations; the unsupervised learning algorithm is able to separate both speeches after finding structure (i.e., identifying individual voices).
 
-## 2. Linear Regression: Model and Cost Function
+## 2. Linear Regression with One Variable: Model and Cost Function
 
 We start with the example of predicting house prices based on the square feet of each of them.
 We have a dataset for training consisting of:
@@ -199,3 +208,43 @@ Covered topics and notation:
 - Inverse and Transpose
   - Only square matrices can be inverted.
   - (Square) Matrices that cannot be inverted are called singular.
+
+## 5. Linear Regression with Multiple Variables
+
+### 5.1 Multivariate Linear Regression
+
+#### Multiple Features
+
+Instead of having a unique feature (e.g., in the house price prediction example: square feet), now we have several features and build a vector $x$ of `n` features:
+
+$x = [x_0, x_1, ..., x_{n}]^{T}$, size `(n+1)x1`
+
+Notation:
+
+- `n`: number of features
+- `m`: number of samples
+- $x^{(i)}$: sample $i$ of a total of `m`
+- $x^{(i)}_j$: feature $j$ of the complete feature vector consisting of `n` unique features
+
+![Multiple features](./pics/multiple_features.png)
+
+The hypothesis/model formula is updated:
+
+$h_{\theta} = \theta_0 + \theta_1 x_1 + \theta_2 x_2 + \theta_3 x_3 + \theta_4 x_4$
+
+By convetion: $x_0 = 1$, and it is associated to the intercept parameters $\theta_0$.
+
+Then, in matrix/vector notation:
+
+$h_{\theta} = \theta^{T} x$,
+
+being
+
+$\theta = [\theta_0,\theta_1,\theta_2,\theta_3,\theta_4]^{T}$, size `(n+1)x1`
+
+$x = [1,x_1,x_2,x_3,x_4]^{T}$, size `(n+1)x1`
+
+Note that both $\theta$ and $x$ are column vectors and that $\theta$ is transposed for the scalar product between vectors.
+
+#### Gradient Descent for Multiple Features
+
