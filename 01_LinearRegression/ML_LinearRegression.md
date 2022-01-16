@@ -22,6 +22,11 @@ Overview of contents:
 4. Linear Algebra Review
 5. Linear Regression with Multiple Variables
    - Multivariate Linear Regression
+     - Multiple Features
+     - Gradient Descent for Multiple Features
+     - Feature Scaling
+     - Learning Rate: How to Choose it
+     - Polynomial Regression
    - Computing Parameters Analytically
 6. Octave/Matlab Tutorial
 
@@ -85,6 +90,10 @@ For **linear regression, the hypothesis model** is a linear function; for the un
 
 $\hat{y} = h_{\theta}(x) = \theta_0 + \theta_1 x$.
 
+```
+hat(y) = h(x) = t0 + t1*x
+```
+
 ### 2.2 Cost Function
 
 We would like to detect the value of those $\theta_j$.
@@ -94,9 +103,17 @@ The **Cost Function** is the total error between the predicted target and the ac
 
 $J(\theta_0,\theta_1) = \frac{1}{2 m} \sum_{i=1}^{m}(h_{\theta}(x^{(i)}) - y^{(i)})^2$
 
+```
+J(t0,t1) = (1/2m) * sum((h(x[:,i])-y[i]))^2)
+```
+
 This cost function is the **mean squared error**; we find the $\theta$ parameters that minimize it:
 
 $\theta_0, \theta_1 \leftarrow \min_{\theta_0,\theta_1} J(\theta_0,\theta_1)$
+
+```
+t0,t1 <- min(J(t0,t1))
+```
 
 One option for minimization is to compute the derivative and equal it to 0. Note that the factor $1/2$ is for convenience, since it is cancelled when the cost function (squared) is derived.
 
@@ -133,15 +150,19 @@ And that's implemented as follows:
 
 $\theta_j \leftarrow \theta_j - \alpha*\frac{\partial}{\partial \theta_j} J(\theta_0,\theta_1)$ for $j=0,1$
 
+```
+tj <- tj - alpha*derivative(J(t0,t1),tj); j = 0,1
+```
+
 The **learning rate** $\alpha$ is a *small* coefficient which decreases our step size so that we don't land on undesired spots (overshooting); intuitively, large $\alpha$ values yield too large steps that might make us further away from the minimum.
 
 All parameters $\theta_j$ need to be updated simultaneously:
 
 ```
-temp0 = theta0 - alpha*derivative(J,theta0)
-temp1 = theta1 - alpha*derivative(J,theta1)
-theta0 = temp0
-theta1 = temp1
+temp0 = t0 - alpha*derivative(J,t0)
+temp1 = t1 - alpha*derivative(J,t1)
+t0 = temp0
+t1 = temp1
 ```
 
 Note that:
@@ -160,11 +181,21 @@ $J(\theta_0,\theta_1) = \frac{1}{2 m} \sum_{i=1}^{m}(h_{\theta}(x^{(i)}) - y^{(i
 
 $J(\theta_0,\theta_1) = \frac{1}{2 m} \sum_{i=1}^{m}(\theta_0 + \theta_1 x^{(i)} - y^{(i)})^2$
 
+```
+J(t0,t1) = (1/2m) * sum((h(x[:,i]) - y[i])^2)
+J(t0,t1) = (1/2m) * sum((t0+t1*x[i] - y[i])^2)
+```
+
 We can easily compute:
 
 $\frac{\partial}{\partial \theta_0} J(\theta_0,\theta_1) = \frac{1}{m} \sum_{i=1}^{m}(\theta_0 + \theta_1 x^{(i)} - y^{(i)})$
 
 $\frac{\partial}{\partial \theta_1} J(\theta_0,\theta_1) = \frac{1}{m} \sum_{i=1}^{m}(\theta_0 + \theta_1 x^{(i)} - y^{(i)})x^{(i)}$
+
+```
+derivative(J(t0,t1),t0) = (1/m) * sum(t0 + t1*x[i] - y[i])
+derivative(J(t0,t1),t1) = (1/m) * sum((t0 + t1*x[i] - y[i])*x[i])
+```
 
 Now, we could simply plug these terms to our algorithm!
 
@@ -213,30 +244,38 @@ Covered topics and notation:
 
 ### 5.1 Multivariate Linear Regression
 
-#### Multiple Features
+#### 5.1.1 Multiple Features
 
 Instead of having a unique feature (e.g., in the house price prediction example: square feet), now we have several features and build a vector $x$ of `n` features:
 
 $x = [x_0, x_1, ..., x_{n}]^{T}$, size `(n+1)x1`
 
+```
+x = [x0, x1, ..., xn]^T, size (n+1)x1
+```
+
 Notation:
 
 - `n`: number of features
 - `m`: number of samples
-- $x^{(i)}$: sample $i$ of a total of `m`
-- $x^{(i)}_j$: feature $j$ of the complete feature vector consisting of `n` unique features
+- $x^{(i)}$: sample $i$ of a total of `m`: `x[:,i]`
+- $x^{(i)}_j$: feature $j$ of the complete feature vector consisting of `n` unique features: `x[j,i]`
 
 ![Multiple features](./pics/multiple_features.png)
 
 The hypothesis/model formula is updated:
 
-$h_{\theta} = \theta_0 + \theta_1 x_1 + \theta_2 x_2 + \theta_3 x_3 + \theta_4 x_4$
+$h_{\theta}(x) = \theta_0 + \theta_1 x_1 + \theta_2 x_2 + \theta_3 x_3 + \theta_4 x_4$
+
+```
+h(x) = t0 + t1*x1 + t2*x2 + t3*x3 + t4*x4
+```
 
 By convetion: $x_0 = 1$, and it is associated to the intercept parameters $\theta_0$.
 
 Then, in matrix/vector notation:
 
-$h_{\theta} = \theta^{T} x$,
+$h_{\theta}(x) = \theta^{T} x$,
 
 being
 
@@ -246,5 +285,65 @@ $x = [1,x_1,x_2,x_3,x_4]^{T}$, size `(n+1)x1`
 
 Note that both $\theta$ and $x$ are column vectors and that $\theta$ is transposed for the scalar product between vectors.
 
-#### Gradient Descent for Multiple Features
+#### 5.1.2 Gradient Descent for Multiple Features
+
+Recall:
+
+$\theta_j \leftarrow \theta_j - \alpha*\frac{\partial}{\partial \theta_j} J(\theta_0,\theta_1)$ for $j=0,1$
+
+```
+tj <- tj - alpha*derivative(J(t0,t1),tj); j = 0,1
+```
+
+Expanding for $j = 0, ..., n$
+
+$h_{\theta}(x) = \theta^{T} x$
+
+$\theta_j \leftarrow \theta_j - \alpha*\frac{1}{m} \sum_{i=1}^{m}{(\theta^{T} x^{(i)} - y^{(i)})x^{(i)}_j}$ for $j=0,...,n$
+
+```
+tj <- tj - alpha*(1/m)*sum((dot(t[:],x[:,i]) - y[:])*x[j,i])
+
+t0 <- t0 - alpha*(1/m)*sum((dot(t[:],x[:,i]) - y[:])*x[0,i]), x[0,i] = 1
+
+t1 <- t1 - alpha*(1/m)*sum((dot(t[:],x[:,i]) - y[:])*x[1,i])
+
+t2 <- t2 - alpha*(1/m)*sum((dot(t[:],x[:,i]) - y[:])*x[2,i])
+
+...
+
+```
+
+![Gradient descent for multiple features](./pics/gradient_descent_multiple.png)
+
+#### 5.1.3 Feature Scaling
+
+When we have features that have different sizes or scaling (e.g., square feet and number of bedrooms), the contours of the cost function will tend to be narrow ellipses, being the axis of the smallest scaled feature the most narrow one.
+As a result, the gradient descent algorithm oscillates and has a slow convergence, because it bounces between the narrow isolines.
+
+A solution is to scale the features so that they lie in the ranges similar to `[0,1]`. Not every feature needs to be exactly in the same range, it is enough if they are in similar ranges.
+It is also common to perform **mean normalization**, i.e., we subtract the feature mean so that the scaled has mean close to `0`, for instance mapping to a range close to `[-1,1]`.
+Some possible scalings:
+
+- `x <- x / max(x)`, approx. `[0,1]`
+- `x <- (x - mean(x)) / (max(x)-min(x))`, approx. `[-0.5,0.5]`
+- `x <- (x - mean(x)) / std(x)`, approx. `[-3,3]`, if data normally distributed (99.7% of data in +-3 std.)
+
+All features (except $x_0 = 1$) are scaled with their own `mean`, `max`, `min`, `std`, etc.
+
+Note that the scaling is often performed by dividing with a value that represents the range or span of the variable distribution.
+
+#### 5.1.4 Learning Rate: How to Choose Its
+
+Typical learning rates are `0.001`, `0.003`, `0.01`, , `0.03`, `0.1`, `0.3`, `1.0`.
+Note the increase `3x` in each step (a rule of thumb).
+
+To check whether the learning rate value is correct, we need to check the evolution of the cost function in the first 100 iterations, approximately; it has been proven that $J$ should decrease for every iteration, if chosen correctly. We can have these scenarios:
+- If $J$ decreases with a steep slope initially, `alpha` is correct.
+- If $J$ decreases slowly, `alpha` is too small and we are taking very small optimization steps. We need to slightly increase `alpha`.
+- If $J$ increases or oscillates (i.e., it is not converging), `alpha` is too big and we are **overshooting**. Basically, we jump from one wall of the valley to the one in front and we start moving outwards. We need to decrease `alpha`.
+
+If `alpha` is optimum, we will have a steep descent at the beginning and we are going to converge to a $J$ value. It is possible to perform an automatic convergence test, for instance if $\Delta J < 0.001$, stop. However, we might have noise in the evolution of $J$ and sometimes is better to plot $J$ and manually stop the training, if we see $J$ has converged.
+
+#### 5.1.5 Polynomial Regression
 
