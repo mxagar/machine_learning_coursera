@@ -442,3 +442,46 @@ and if we want to have inline plots (embedded in the notebook), we execute the f
 For more information, see the link above and check also:
 
 [Jupyter Octave Kernel Inline Graph @ Stackoverflow](https://stackoverflow.com/questions/65511187/jupyter-octave-kernel-inline-graph-windows).
+
+### Vectorized Gradient Descent (from the notebook)
+
+We should use the native way of managing data of each language. In the case of Matlab/Octave, that way is using matrices: transform everything into matrices and vectors and perform operations with them instead of having scalar variables and for loops.
+
+![Vectorization of the Gradient Descent](./pics/vectorization.png)
+
+```octave
+
+% Initial values
+X = [1 1; 1 2; 1 3; 1 4; 1 5]
+theta = ones(2,1)
+y = [1; 2; 3; 4; 5]
+alpha = 0.1
+
+% For each sample one prediction
+p = X*theta % 5x1
+
+% Difference prediction - target for all samples (error)
+(p-y) % 5x1
+
+% Sample difference multiplied by each sample feature vector
+(p-y).*X % 5x2
+
+% Sum along samples
+sum((p-y).*X,1) % 1x2
+
+% Derivative
+delta = (1 / (size(X,1))) * sum((p-y).*X,1)' % 2x1
+
+% Update
+theta = theta - alpha*delta % 2x1: [0.9; 0.7]
+
+% NEW prediction
+p = X*theta
+
+% NEW difference prediction - target for all samples (error)
+% We are closer to 0 error :)
+(p-y)
+
+% And so on...
+
+```
