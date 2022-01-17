@@ -402,12 +402,13 @@ $\theta = [\theta_0, \theta_1,\theta_2,\theta_3,...,\theta_n]$
 
 ![Normal equation: analytical closed-form for regression](./pics/normal_equation.png)
 
-Note that $(X^TX)^{-1}X^T$ is the **pseudoinverse** of $X$: `pinv(X)`; and:
+Note that $(X^T X)^{-1}X^T$ is the **pseudoinverse** of $X$: `pinv(X)`; and:
 - We don't need feature scaling here, since feature scaling makes sense only for gradient descent.
-- Computing the inverse of $(X^TX)$ can become `O(n^3)`, very expensive; gradient descent is more close to `O(n^2)`.
+- Computing the inverse of $(X^T X)$ can become `O(n^3)`, very expensive; gradient descent is more close to `O(n^2)`.
 - $(X^TX)$ is usually invertible, but if not (i.e., it is singular), it is usually because
   - We have too many features: `m < n`; in that case, delete some features or use regularization
   - Features may be linearly dependent; in that case, too, delete some features and use regularization
+- In Octave/Matlab `pinv(A)` computes `inv(A)` if `A` is invertible; thus, instead of applying `pinv(X)*y`, we can apply `pinv(X'X)*X'*y`, being `X'` the transpose.
 
 Pros and cons of the normal equation vs. the iterative gradient descent:
 - The gradient descent is iterative and we need to choose the appropriate value of the learning rate `alpha`.
