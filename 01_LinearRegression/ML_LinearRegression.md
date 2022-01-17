@@ -31,7 +31,7 @@ Overview of contents:
      - Feature Scaling
      - Learning Rate: How to Choose it
      - Polynomial Regression
-   - Computing Parameters Analytically
+   - Computing Parameters Analytically: Normal Equation
 6. Octave/Matlab Tutorial
 
 ## 1. Introduction
@@ -404,7 +404,7 @@ $\theta = [\theta_0, \theta_1,\theta_2,\theta_3,...,\theta_n]$
 
 Note that $(X^TX)^{-1}X^T$ is the **pseudoinverse** of $X$: `pinv(X)`; and:
 - We don't need feature scaling here, since feature scaling makes sense only for gradient descent.
-- Computing the inverse of $(X^TX)$ can become `O(n^3)`, very expensive.
+- Computing the inverse of $(X^TX)$ can become `O(n^3)`, very expensive; gradient descent is more close to `O(n^2)`.
 - $(X^TX)$ is usually invertible, but if not (i.e., it is singular), it is usually because
   - We have too many features: `m < n`; in that case, delete some features or use regularization
   - Features may be linearly dependent; in that case, too, delete some features and use regularization
@@ -413,3 +413,8 @@ Pros and cons of the normal equation vs. the iterative gradient descent:
 - The gradient descent is iterative and we need to choose the appropriate value of the learning rate `alpha`.
 - However, the gradient descent is much more efficient if we have `n > 10000` features; that often happens in practice!
 - Gradient descent is usually the way to go when we go beyond regression and our models have more complex forms.
+
+## 6. Octave/Matlab Tutorial
+
+See `01_1_Octave_Tutorial.ipynb`.
+
