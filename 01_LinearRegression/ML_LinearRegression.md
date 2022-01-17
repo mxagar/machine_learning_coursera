@@ -419,3 +419,26 @@ Pros and cons of the normal equation vs. the iterative gradient descent:
 
 See `01_1_Octave_Tutorial.ipynb`.
 
+Note that plotting with the Octave kernel is not straightforward on Jupyter: As written in the unofficial Jupyter octave kernel page [Calysto/octave_kernel](https://github.com/Calysto/octave_kernel), we need to add the following line to `~/.octaverc`:
+
+```
+vim ~/.octaverc
+# Set Qt the gnuplot terminal
+setenv("GNUTERM","qt");
+```
+
+Additionally, we execute in our notebook at the beginning:
+
+```
+graphics_toolkit ("gnuplot");
+```
+
+and if we want to have inline plots (embedded in the notebook), we execute the following magic command:
+
+```
+%plot -b inline:gnuplot
+```
+
+For more information, see the link above and check also:
+
+[Jupyter Octave Kernel Inline Graph @ Stackoverflow](https://stackoverflow.com/questions/65511187/jupyter-octave-kernel-inline-graph-windows).
