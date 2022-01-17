@@ -6,6 +6,10 @@ For setup and general information, please look at `../README.md`.
 
 This file my notes related to **linear regression**.
 
+Note that Latex formulae are not always rendered in Markdown readers; for instance, they are not rendered on Github, but they are on VS Code with the MArkup All In One plugin.
+Therefore, I provide a pseudocode of the most important equations.
+An alternative would be to use Asciidoc, but rendering of equations is not straightforward either.
+
 Overview of contents:
 
 1. Introduction
@@ -42,7 +46,7 @@ Some applications: Computer Vision, Natural Language Processing, Recommender Sys
 Two popular definitions:
 
 - Arthur Samuel (1959): field of study that gives computers the ability to learn without being specifically programmed for that.
-- Tom Mitchell (1998): a computer program is said to learn from experience E with respecto som task T and some performance measure P, it its performance P on T improves with experience E.
+- Tom Mitchell (1998): a computer program is said to learn from experience E with respect to some task T and some performance measure P, it its performance P on T improves with experience E.
 
 Types of Machine Learning:
 
@@ -230,7 +234,7 @@ Covered topics and notation:
   - A_ij: element in row i and column j from matrix A
 - Addition and Scalar Multiplication
 - Matrix Vector Multiplication
-  - Linear models can be written in matrix notation: $h = X \theta$
+  - Linear models can be written in matrix notation: $h = \theta^T x$
 - Matrix Matrix Multiplication
 - Matrix Multiplication Properties
    - Non-commutative: $A \times B \neq B \times A$
@@ -347,3 +351,65 @@ If `alpha` is optimum, we will have a steep descent at the beginning and we are 
 
 #### 5.1.5 Polynomial Regression
 
+Beyond linear or first degree equations, we can also fit polynomial or n-degree equations using the same scheme.
+The only change we need to do is to convert the higher degree terms in new variables:
+
+$h(x) = \theta_0 + \theta_1 x + \theta_2 x^2 + \theta_3 x^3 = \theta_0 + \theta_1 x_1 + \theta_2 x_2 + \theta_3 x_3$
+
+with
+
+$x_1 = x, x_2 = x^2, x_3 = x^3$.
+
+```
+h(x) = t0 + t1*x + t2*x^2 + t3*x^3 = t0 + t1*x_1 + t2*x_2 + t3*x_3
+x1 = x, x2 = x^2, x3 = x^3
+```
+
+Notes:
+- Scaling is essential if we do that: we need to scale each $x_j$
+- We can also use `sqrt(x)` or other terms: look at the scatterplot and try to figure which polynomial terms could approximate the relationship.
+
+## 5.2 Computing Parameters Analytically
+
+### 5.2.1 Normal Equation
+
+If the cost function closed form is known, we can analytically derive the closed form analytical solution for linear regression.
+For that, we just create a system of $j$ equations with $j$ unknowns $\theta_j$ that need to satisfy that $J$ has the gradient value 0:
+
+$\frac{\partial}{\partial \theta_j} J(\theta) = 0, \forall \theta_j$
+
+For the case of linear regressions, the solution is:
+
+$\theta = (X^TX)^{-1}X^Ty$
+
+```
+t = inv(transpose(X)*X)*transpose(X)*y
+```
+
+$X$ contains in its rows all the samples $i$, as follows:
+
+$x = [1, x_1,x_2,x_3,...,x_n]$: one sample form with $x_0 = 1$.
+
+$X = [x^{(1)}, x^{(2)}, x^{(3)}, ..., x^{(m)}]^T$: design matrix form with all samples stacked in the rows.
+
+The target column vector $y$ contains all targets for each sample:
+
+$y = [y^{(1)}, y^{(2)}, y^{(3)}, ..., y^{(m)}]^T$
+
+The solution $\theta$ is a column vector with the $n+1$ parameters:
+
+$\theta = [\theta_0, \theta_1,\theta_2,\theta_3,...,\theta_n]$
+
+![Normal equation: analytical closed-form for regression](./pics/normal_equation.png)
+
+Note that $(X^TX)^{-1}X^T$ is the **pseudoinverse** of $X$: `pinv(X)`; and:
+- We don't need feature scaling here, since feature scaling makes sense only for gradient descent.
+- Computing the inverse of $(X^TX)$ can become `O(n^3)`, very expensive.
+- $(X^TX)$ is usually invertible, but if not (i.e., it is singular), it is usually because
+  - We have too many features: `m < n`; in that case, delete some features or use regularization
+  - Features may be linearly dependent; in that case, too, delete some features and use regularization
+
+Pros and cons of the normal equation vs. the iterative gradient descent:
+- The gradient descent is iterative and we need to choose the appropriate value of the learning rate `alpha`.
+- However, the gradient descent is much more efficient if we have `n > 10000` features; that often happens in practice!
+- Gradient descent is usually the way to go when we go beyond regression and our models have more complex forms.
