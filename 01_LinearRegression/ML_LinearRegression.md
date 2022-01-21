@@ -33,6 +33,8 @@ Overview of contents:
      - Polynomial Regression
    - Computing Parameters Analytically: Normal Equation
 6. Octave/Matlab Tutorial
+   - Vectorized Gradient Descent (from the notebook)
+7. Exercise 1 (Week 2)
 
 ## 1. Introduction
 
@@ -443,7 +445,7 @@ For more information, see the link above and check also:
 
 [Jupyter Octave Kernel Inline Graph @ Stackoverflow](https://stackoverflow.com/questions/65511187/jupyter-octave-kernel-inline-graph-windows).
 
-### Vectorized Gradient Descent (from the notebook)
+### 6.1 Vectorized Gradient Descent (from the notebook)
 
 We should use the native way of managing data of each language. In the case of Matlab/Octave, that way is using matrices: transform everything into matrices and vectors and perform operations with them instead of having scalar variables and for loops.
 
@@ -485,3 +487,41 @@ p = X*theta
 % And so on...
 
 ```
+
+## 7. Exercise 1 (Week 2)
+
+
+### 7.1 Workflow
+
+Exercise files:
+- `warmUpExercise.m`
+- `plotData.m`
+- `computeCost.m`
+- `gradientDescent.m`
+- `computeCostMulti.m`
+- `gradientDescentMulti.m`
+- `featureNormalize.m`
+- `normalEqn.m`
+
+Data:
+- `ex1data1.txt`
+- `ex1data2.txt`
+
+Exercise guide PDF: `ex1.pdf`
+
+Workflow:
+- Download latest Octave version of exercise from Coursera
+- Complete code in exercise files following `ex1.pdf`
+- Whenever an exercise part is finished
+  - Check it with `ex1` or `ex1_multi` in Octave terminal
+  - Create a submission token on Coursera (exercise submission page, it lasts 30 minutes)
+  - Execute `submit` in Octave terminal
+  - Introduce email and token
+  - Results appear
+
+### 7.2 Exercises
+
+1. Linear Regression with One Variable
+2. Linear Regression with Multiple Variables (Optional)
+
+
