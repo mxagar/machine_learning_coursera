@@ -27,8 +27,13 @@ sigma = zeros(1, size(X, 2));
 %       
 
 
+n = size(X,2); % features
 
-
+for j = 1:n
+    mu(j) = mean(X(:,j));
+    sigma(j) = std(X(:,j));
+    X_norm(:,j) = (X(:,j)-mu(j))/sigma(j);
+end
 
 
 
