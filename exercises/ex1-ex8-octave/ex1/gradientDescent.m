@@ -17,11 +17,16 @@ for iter = 1:num_iters
     %       of the cost function (computeCost) and gradient here.
     %
 
-
-
-
-
-
+    % Cost derivatives: dJ/dt
+    p = X*theta; % m x 1
+    d = (p-y);
+    dJ_0 = (1.0/m)*d'*X(:,1);
+    dJ_1 = (1.0/m)*d'*X(:,2);
+    % Update theta
+    t0 = theta(1,1) - alpha*dJ_0;
+    theta(1,1) = t0;
+    t1 = theta(2,1) - alpha*dJ_1;
+    theta(2,1) = t1;    
 
     % ============================================================
 
