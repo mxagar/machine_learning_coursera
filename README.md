@@ -5,7 +5,7 @@ These are my notes on the Coursera course by Andrew Ng ["Machine Learning"](http
 The course is divided in 11 learning weeks which cover several topics from Machine Learning:
 
 - Week 1: Introduction, Linear Regression
-- Week 2
+- Week 2: Linear Regression
 - Week 3
 - Week 4
 - Week 5

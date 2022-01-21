@@ -521,7 +521,222 @@ Workflow:
 
 ### 7.2 Exercises
 
-1. Linear Regression with One Variable
-2. Linear Regression with Multiple Variables (Optional)
+We have two exercises:
+1. Restaurant franchise trying to decide where to open next. Data: Profits vs. Habitants. (Compulsory).
+2. House price model. Data size (square feet) & number of bedrooms vs. price (Optional).
+
+Exercise files:
+- `warmUpExercise.m`
+- `plotData.m`
+- `computeCost.m`
+- `gradientDescent.m`
+- `computeCostMulti.m`
+- `gradientDescentMulti.m`
+- `featureNormalize.m`
+- `normalEqn.m`
+
+Data:
+- `ex1data1.txt`: one variable
+- `ex1data2.txt`: multiple variable (optional)
+
+Exercise guide PDF: `ex1.pdf`
+
+Workflow:
+- Download latest Octave version of exercise from Coursera
+- Complete code in exercise files following `ex1.pdf`
+- Whenever an exercise part is finished
+  - Check it with `ex1` (1st part) or `ex1_multi` (2nd part, optional) in Octave terminal
+  - Create a submission token on Coursera (exercise submission page, it lasts 30 minutes)
+  - Execute `submit` in Octave terminal
+  - Introduce email and token
+  - Results appear
+
+**Overview of exercises and their sections**
+
+1. Linear Regression with One Variable - Restaurant Revenue.
+    - Data Loaing & Plotting
+    - Formulae and Dimensions of Variables & Parameters
+    - Cost Function
+    - Gradient Descent
+    - Plotting the Cost Function
+2. Linear Regression with Multiple Variablees - House prices.
+    - Data Loaing & Plotting
+    - Feature Normalization
+    - Gradient Descent
+    - Prediction
+    - Different Learning Rates
+    - Normal Equations
+
+
+`../exercises/ex1-ex8-octave/ex1/ML_Coursera_Ex_1_Linear_Regression.ipynb`
+
+```octave
+
+%%%%% 1. Linear Regression with One Variable - Restaurant Revenue.
+
+graphics_toolkit ("gnuplot");
+%plot -b inline:gnuplot
+
+%% -- Data Loaing & Plotting
+
+data = load('ex1data1.txt');       % read comma separated data
+X = data(:, 1); y = data(:, 2);
+m = length(y);                     % number of training examples
+plot(X, y, 'rx', 'MarkerSize', 10); % Plot the data
+ylabel('Profit in $10,000s'); % Set the y−axis label
+xlabel('Population of City in 10,000s'); % Set the x−axis label
+
+%% -- Cost Function and Gradient Descent
+
+iterations = 1500
+alpha = 0.01
+theta = zeros(2,1)
+
+m = length(y);
+J_history = zeros(iterations,1);
+
+for i = 1:iterations
+    % Cost derivatives: dJ/dt
+    p = X*theta; % m x 1
+    d = (p-y);
+    dJ_0 = (1.0/m)*d'*X(:,1);
+    dJ_1 = (1.0/m)*d'*X(:,2);
+    % Update theta
+    t0 = theta(1,1) - alpha*dJ_0;
+    theta(1,1) = t0;
+    t1 = theta(2,1) - alpha*dJ_1;
+    theta(2,1) = t1;    
+    % Compute Cost
+    p = X*theta; % m x 1
+    e = (p-y).^2; % m x 1 
+    J = (0.5/m)*sum(e);
+    J_history(i) = J;
+end
+
+plot([1:iterations],J_history)
+
+% Plot scatterplot with regression line
+x1 = 5:0.1:25;
+p = theta(1) + x1*theta(2);
+X = [ones(size(X,1),1),data(:, 1)];
+y = data(:, 2);
+
+plot(X(:,2),y(:),'rx')
+hold on;
+plot(x1,p,'b')
+ylabel('Profit in $10,000s');
+xlabel('Population of City in 10,000s');
+
+%% -- Plotting the Cost Function
+
+theta0_vals = linspace(-10,10,100);
+theta1_vals = linspace(-1,4,100);
+
+X = [ones(size(X,1),1),data(:, 1)];
+y = data(:, 2);
+m = length(y);
+
+% initialize J vals to a matrix of 0's
+J_vals = zeros(length(theta0_vals), length(theta1_vals));
+% Fill out J vals
+for i = 1:length(theta0_vals)
+    for j = 1:length(theta1_vals)
+        t = [theta0_vals(i); theta1_vals(j)];
+        % Compute Cost
+        p = X*t; % m x 1
+        e = (p-y).^2; % m x 1 
+        J = (0.5/m)*sum(e);
+        %J_vals(i,j) = computeCost(x, y, t);
+        J_vals(i,j) = J;
+    end
+end
+
+% Because of the way meshgrids work in the surf command, we need to
+% transpose J_vals before calling surf, or else the axes will be flipped
+J_vals = J_vals';
+surf(theta0_vals,theta1_vals,J_vals)
+xlabel('\theta_0')
+ylabel('\theta_1')
+
+% Plot J_vals as 15 contours spaced logarithmically between 0.01 and 100
+%contour(theta0_vals,theta1_vals,J_vals,20)
+contour(theta0_vals,theta1_vals,J_vals,logspace(-2, 3, 20))
+xlabel('theta_0')
+ylabel('theta_1')
+hold on;
+plot(theta(1), theta(2), 'rx', 'MarkerSize', 10, 'LineWidth', 2);
+
+%%%%% 1.  Linear Regression with Multiple Variablees - House prices.
+
+%% -- Loading and Plotting
+
+data = load('ex1data2.txt');
+X = data(:, 1:2); % Note: no x_0 augmentation yet!
+y = data(:, 3);
+m = length(y); % samples
+n = size(X,2); % features
+plot3(X(:,1),X(:,2),y,'rx')
+
+%% -- Feature Normalization
+
+X_norm = X;
+% Save them for later, to undo/apply the scaling
+mu = zeros(1, n);
+sigma = zeros(1, n);
+
+for j = 1:n
+    mu(j) = mean(X(:,j));
+    sigma(j) = std(X(:,j));
+    X_norm(:,j) = (X(:,j)-mu(j))/sigma(j);
+end
+
+% Augment the normalized independent variable X with x_0 = 1 
+X_norm = [ones(m,1),X_norm];
+
+%% -- Gradient Descent
+
+iterations = 1500
+alpha = 0.01
+theta = zeros(n+1,1)
+
+J_history = zeros(iterations,1);
+
+for k = 1:iterations
+    p = X_norm*theta; % m x 1
+    d = (p-y);
+    dJ = zeros(1,n+1); % n features, n+1 parameters
+    for j = 1:(n+1)
+        % Cost derivative
+        dJ(1,j) = (1.0/m)*d'*X_norm(:,j);
+        % Update theta
+        theta(j,1) = theta(j,1) - alpha*dJ(1,j);
+    end
+    % Compute Cost
+    p = X_norm*theta; % m x 1
+    e = (p-y).^2; % m x 1 
+    J = (0.5/m)*sum(e);
+    J_history(k) = J;
+end
+
+plot([1:iterations],J_history)
+
+%% -- Prediction
+
+% Estimate the price of a 1650 sq-ft, 3 br house
+X = [1650, 3];
+X_norm = [(X(1,1)-mu(1))/sigma(1), (X(1,2)-mu(2))/sigma(2)];
+price = [1, X_norm]*theta
+
+%% -- Normal Equations
+
+% The normal equations do not require feature normalization
+% but we need to augment X with x_0 = 1
+X = [ones(m,1),X];
+theta_norm = pinv(X'*X)*X'*y
+
+% Note that both formulas lead to the same result
+theta_norm = pinv(X)*y
+
+```
 
 
