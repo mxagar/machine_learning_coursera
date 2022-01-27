@@ -1,0 +1,6 @@
+*.dat
+.DS_Store
+.vscode
+build
+.ipynb_checkpoints
+*.png
