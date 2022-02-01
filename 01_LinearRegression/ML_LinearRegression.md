@@ -1,4 +1,4 @@
-# Mechine Learning: Introduction and Linear Regression
+# Machine Learning: Introduction and Linear Regression
 
 These are my notes on the Coursera course by Andrew Ng ["Machine Learning"](https://www.coursera.org/learn/machine-learning).
 
