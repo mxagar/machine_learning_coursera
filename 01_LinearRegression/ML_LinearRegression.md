@@ -35,6 +35,7 @@ Overview of contents:
 6. Octave/Matlab Tutorial
    - Vectorized Gradient Descent (from the notebook)
 7. Exercise 1 (Week 2)
+8. Regularization for Linear Regression: See `ML_LogisticRegression.md`
 
 ## 1. Introduction
 
@@ -749,4 +750,6 @@ theta_norm = pinv(X)*y
 
 ```
 
+## 8. Regularization for Linear Regression: See `ML_LogisticRegression.md`
 
+Regularization for Linear Regression: See `ML_LogisticRegression.md`.
