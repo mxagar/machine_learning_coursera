@@ -236,9 +236,9 @@ function [jVal, jGrad] = costFunction(theta)
 Then, we pass the pointer to our `costFunction` in the chosen optimization algorithm, such as:
 
 ```octave
-options = optimset(‘GradObj’, ‘on’, ‘MaxIter’, ‘100’);
-initialTheta = zeros(2,1);
-[optTheta, functionVal, exitFlag] = fminunc(@costFunction, initialTheta, options);
+options = optimset('GradObj', 'on', 'MaxIter', 400);
+initial_theta = zeros(3,1);
+[optTheta, functionVal, exitFlag] = fminunc(@(t)(costFunction(t, X, y)), initial_theta, options);
 ```
 
 **Important note**: the derivative vector is called gradient.
@@ -409,3 +409,54 @@ t2 <- t2 - (alpha*/m)*(sum((h(x[:,i]) - y[:])*x[2,i]) + lambda*theta[2])
 ```
 
 We can use that also with advanced optimization methods; we just need to define a `costFunction` that returns the cost and its gradient with the regularization term.
+
+## 5. Exercise 2 (Week 3)
+
+### 5.1 Workflow
+
+Files provided by Coursera, located under `../exercises/ex1-ex8-octave/ex2`
+
+- `ex2.m` - Octave/MATLAB script that steps you through the exercise
+- `ex2_reg.m` - Octave/MATLAB script for the later parts of the exercise
+- `ex2data1.txt` - Training set for the first half of the exercise
+- `ex2data2.txt` - Training set for the second half of the exercise
+- `submit.m` - Submission script that sends your solutions to our servers
+- `mapFeature.m` - Function to generate polynomial features
+- `plotDecisionBoundary.m` - Function to plot classifier’s decision boundary
+
+Files to complete:
+- `plotData.m` - Function to plot 2D classification data
+- `sigmoid.m` - Sigmoid Function
+- `costFunction.m` - Logistic Regression Cost Function
+- `predict.m` - Logistic Regression Prediction Function
+- `costFunctionReg.m` - Regularized Logistic Regression Cost
+
+Workflow:
+- Download latest Octave version of exercise from Coursera
+- Complete code in exercise files following `ex2.pdf`
+- Whenever an exercise part is finished
+  - Check it with `ex2` or `ex2_reg` in Octave terminal
+  - Create a submission token on Coursera (exercise submission page, it lasts 30 minutes)
+  - Execute `submit` in Octave terminal
+  - Introduce email and token
+  - Results appear
+
+### 5.2 Exercises
+
+I completed the official exercises in Octave:
+
+`../exercises/ex1-ex8-octave`
+
+However, I forked also a python version of the exercises that can be used for submission also!
+
+`~/git_repositories/ml-coursera-python-assignments`
+
+[ml-coursera-python-assignments](https://github.com/mxagar/ml-coursera-python-assignments)
+
+**Overview of exercises and their sections**
+
+1. A
+2. B
+
+
+`../exercises/ex1-ex8-octave/ex2/ML_Coursera_Ex_2_Logistic_Regression.ipynb`
