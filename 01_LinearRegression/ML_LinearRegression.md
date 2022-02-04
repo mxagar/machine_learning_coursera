@@ -524,7 +524,7 @@ Workflow:
 
 I completed the official exercises in Octave:
 
-`../exercises/ex1-ex8-octave`
+`../exercises/ex1-ex8-octave/ex1`
 
 However, I forked also a python version of the exercises that can be used for submission also!
 
