@@ -20,12 +20,14 @@ grad = zeros(size(theta));
 % Note: grad should have the same dimensions as theta
 %
 
+%h = 1.0 ./ (1 .+ exp(-X*theta)); % X*theta is mx1 -> h = sigmoid(X*theta) is mx1
+h = sigmoid(X*theta); % X*theta is mx1 -> h = sigmoid(X*theta) is mx1
 
+J = (-1.0/m)*(y'*log(h) + (1.-y)'*log(1.-h))
 
+e = (h-y); % m x 1
 
-
-
-
+grad = (1.0/m)*e'*X % 1 x (n+1)
 
 % =============================================================
 

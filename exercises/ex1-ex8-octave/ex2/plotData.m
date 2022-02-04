@@ -13,11 +13,15 @@ figure; hold on;
 %
 
 
-
-
-
-
-
+% Find Indices of Positive and Negative Examples
+pos = find(y == 1);
+neg = find(y == 0);
+% Plot Examples
+plot(X(pos, 1), X(pos, 2), 'k+','LineWidth', 2, 'MarkerSize', 7);
+plot(X(neg, 1), X(neg, 2), 'ko', 'MarkerFaceColor', 'y', 'MarkerSize', 7);
+%xlabel('Score Exam 1'); % Set the x−axis label
+%ylabel('Score Exam 2'); % Set the y−axis label
+%legend('Admitted','Not admitted')
 
 
 % =========================================================================

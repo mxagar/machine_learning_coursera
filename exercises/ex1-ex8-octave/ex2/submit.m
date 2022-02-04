@@ -1,5 +1,6 @@
 function submit()
-  addpath('./lib');
+  %addpath('./lib');
+  addpath('../ex1/lib');
 
   conf.assignmentKey = 'JvOPouj-S-ys8KjYcPYqrg';
   conf.itemName = 'Logistic Regression';
