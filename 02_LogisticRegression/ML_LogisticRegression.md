@@ -27,6 +27,8 @@ Overview of contents:
    - 4.3 Regularized Linear Regression: Gradient Descent and Normal Equations
    - 4.4 Regularized Logistic Regression
 5. Exercise 2 (Week 3)
+   - Octave code summary
+   - Python implementation notes
 
 
 ## 1. Classification and Representation
@@ -445,7 +447,7 @@ Workflow:
 
 I completed the official exercises in Octave:
 
-`../exercises/ex1-ex8-octave`
+`../exercises/ex1-ex8-octave/ex2`
 
 However, I forked also a python version of the exercises that can be used for submission also!
 
@@ -453,10 +455,435 @@ However, I forked also a python version of the exercises that can be used for su
 
 [ml-coursera-python-assignments](https://github.com/mxagar/ml-coursera-python-assignments)
 
-**Overview of exercises and their sections**
+There are two execises:
 
-1. A
-2. B
+1. Exercise 1 - Logistic Regression: Build classification model of student admision based on the score of two exams; we have a dataset of 100 applicants, each one with their 2 scores and the label whether they were admited (y = 1) or not.
+2. Exercise 2 - Regularized Logistic Regression: Microchips are acccepted or rejected depending on their results of two tests.
 
+Files provided by Coursera, located under `../exercises/ex1-ex8-octave/ex2`
+
+- `ex2.m` - Octave/MATLAB script that steps you through the exercise
+- `ex2_reg.m` - Octave/MATLAB script for the later parts of the exercise
+- `ex2data1.txt` - Training set for the first half of the exercise
+- `ex2data2.txt` - Training set for the second half of the exercise
+- `submit.m` - Submission script that sends your solutions to our servers
+- `mapFeature.m` - Function to generate polynomial features
+- `plotDecisionBoundary.m` - Function to plot classifier’s decision boundary
+
+Files to complete:
+- `plotData.m` - Function to plot 2D classification data
+- `sigmoid.m` - Sigmoid Function
+- `costFunction.m` - Logistic Regression Cost Function
+- `predict.m` - Logistic Regression Prediction Function
+- `costFunctionReg.m` - Regularized Logistic Regression Cost
+
+Workflow:
+- Download latest Octave version of exercise from Coursera
+- Complete code in exercise files following `ex2.pdf`
+- Whenever an exercise part is finished
+  - Check it with `ex2` or `ex2_reg` in Octave terminal
+  - Create a submission token on Coursera (exercise submission page, it lasts 30 minutes)
+  - Execute `submit` in Octave terminal (**Watch out: I had to modify it to add the path of ex1/lib instead of ex2/lib**)
+  - Introduce email and token
+  - Results appear
+
+**Overview of contents:**
+
+0. Setup: `gnuplot`
+1. Exercise 1: Logistic Regression
+    - 1.1 Visualizing the Data: `plotData.m`
+    - 1.2. Sigmoid Function: `sigmoid.m`
+    - 1.3. Cost Function and Gradient: `costFunction.m`
+    - 1.4. Optimization
+        - 4.1 Gradient Descent: It does not work right away
+        - 4.2 Advanced Optimization with `fminfunc`
+        - 4.3 Python Notes: `scipy.optimize`
+    - 1.5. Prediction: `predict.m`
+2. Exercise 2: Regularized Logistic Regression
+    - 2.1 Visualizing the Data
+    - 2.2 Feature Mapping: Polynomial Logistic Regression
+    - 2.3 Cost Function and Gradient with Regularization: `costFunctionReg.m`
+    - 2.4 Plotting the Nonlinear Decision Boundary: `plotDecisionBoundary.m`
+    - 2.5 Trying Different Regularization Parameters `lambda`
+    - 2.6 Python Notes: Mapping Features & Plotting Nonlinear Decision Boundaries
+
+
+Summary of the code in
 
 `../exercises/ex1-ex8-octave/ex2/ML_Coursera_Ex_2_Logistic_Regression.ipynb`
+
+(**Note: look at final notes on python implementation!**)
+
+```octave
+
+graphics_toolkit ("gnuplot");
+%plot -b inline:gnuplot
+
+%%% -- 1. Exercise 1: Logistic Regression
+
+%% -- 1.1. Visualizing the Data: plotData.m
+
+data = load('ex2data1.txt');       % read comma separated data
+X = data(:, 1:2); y = data(:, 3);
+
+function plotData(X, y)
+    figure; hold on;
+    pos = find(y == 1);
+    neg = find(y == 0);
+    plot(X(pos, 1), X(pos, 2), 'k+','LineWidth', 2, 'MarkerSize', 7);
+    plot(X(neg, 1), X(neg, 2), 'ko', 'MarkerFaceColor', 'y', 'MarkerSize', 7);
+    legend('Accepted','Not accepted')
+    hold off;
+end
+
+%% -- 1.2. Sigmoid Function: sigmoid.m
+
+function g = sigmoid(z)
+    g = zeros(size(z));
+    g = 1.0 ./ (1 .+ exp(-z));
+end
+
+%% -- 1.3. Cost Function and Gradient: costFunction.m
+
+function [J, grad] = costFunction(theta, X, y)
+    m = length(y); % number of training examples
+    J = 0;
+    grad = zeros(size(theta));
+
+    %h = 1.0 ./ (1 .+ exp(-X*theta)); % X*theta is mx1 -> h = sigmoid(X*theta) is mx1
+    h = sigmoid(X*theta); % X*theta is mx1 -> h = sigmoid(X*theta) is mx1
+    J = (-1.0/m)*(y'*log(h) + (1.-y)'*log(1.-h));
+    e = (h-y); % m x 1
+    grad = (1.0/m)*e'*X; % 1 x (n+1)
+end
+
+%% -- 1.4. Advanced Optimization with fminfunc
+
+data = load('ex2data1.txt');
+X = data(:, 1:2); y = data(:, 3);
+[m, n] = size(X);
+X = [ones(m, 1) X];
+
+% Options:
+% GradObj on: our function returns cost and gradient
+% MaxIter: maximum iterations
+% @(t)(costFunction(t, X, y)): function with parameter t -> the value of t for min costFunction will be found
+% initialTheta: initial value of t
+options = optimset('GradObj', 'on', 'MaxIter', 400);
+initial_theta = zeros(3,1);
+[optTheta, functionVal, exitFlag] = fminunc(@(t)(costFunction(t, X, y)), initial_theta, options);
+
+% Boundary : theta^T*X = 0
+% t0 + t1*x1 + t2*x2 = 0 -> x2 = (-1/t2)*(t0 + t1*x1)
+x1 = 30:0.1:100;
+x2 = (-1.0/optTheta(3))*(optTheta(1) + optTheta(2)*x1);
+
+plotData(X(:,2:size(X,2)),y)
+hold on;
+plot(x1, x2, 'b-')
+
+%% -- 1.5. Prediction: predict.m
+
+% Student with 45 in exam 1, 85 in exam 2 -> predict whether he/she passes
+x = [1 45 85];
+h = sigmoid(x*optTheta) % if h > 0.5 -> y_hat = 1
+
+p = sigmoid(X*optTheta);
+y_hat = p >= 0.5;
+
+% Accuracy of training
+mean(y == y_hat)
+
+%%% -- Exercise 2: Regularized Logistic Regression
+
+%% -- 2.1 Visualizing the Data
+
+data = load('ex2data2.txt');
+X = data(:, 1:2); y = data(:, 3);
+plotData(X,y)
+
+%% -- 2.2 Feature Mapping: Polynomial Logistic Regression
+
+% Util file from the exercise kit
+% [X1, X2] transformed into a 28-dimensional feature array!
+% This allows for non-linear decision boundaries
+% but overfitting risk arises!
+function out = mapFeature(X1, X2)
+    % MAPFEATURE Feature mapping function to polynomial features
+    %
+    %   MAPFEATURE(X1, X2) maps the two input features
+    %   to quadratic features used in the regularization exercise.
+    %
+    %   Returns a new feature array with more features, comprising of 
+    %   X1, X2, X1.^2, X1*X2, X2.^2, X1.^3, ... , X1*X2.^5, X2.^6
+    %
+    %   Inputs X1, X2 must be the same size
+    %
+    degree = 6;
+    out = ones(size(X1(:,1)));
+    for i = 1:degree
+        for j = 0:i
+            out(:, end+1) = (X1.^(i-j)).*(X2.^j);
+        end
+    end
+end
+
+%% -- 2.3 Cost Function and Gradient with Regularization: costFunctionReg.m
+
+function [J, grad] = costFunctionReg(theta, X, y, lambda)
+    m = length(y); % number of training examples
+    n = length(theta) - 1;
+    J = 0;
+    grad = zeros(size(theta));
+
+    %h = 1.0 ./ (1 .+ exp(-X*theta)); % X*theta is mx1 -> h = sigmoid(X*theta) is mx1
+    h = sigmoid(X*theta); % X*theta is mx1 -> h = sigmoid(X*theta) is mx1
+    J = (-1.0/m)*(y'*log(h) + (1.-y)'*log(1.-h));
+    e = (h-y); % m x 1
+    grad = (1.0/m)*e'*X; % 1 x (n+1)
+    
+    % Regularization terms
+    % Cost    
+    % theta'*theta, but without theta_0
+    J = J + (0.5*lambda/m)*theta(2:(n+1))'*theta(2:(n+1));
+    % Gradient
+    t = (lambda/m)*theta'; % 1 x (n+1)
+    t(1) = 0; % remove theta_0
+    grad = grad + t;
+end
+
+data = load('ex2data2.txt');
+X = data(:, 1:2); y = data(:, 3);
+
+X = mapFeature(X(:,1), X(:,2));
+
+% Initialize fitting parameters
+initial_theta = zeros(size(X, 2), 1);
+
+% Set regularization parameter lambda to 1
+lambda = 1;
+
+% Compute and display initial cost and gradient for regularized logistic
+% regression
+[cost, grad] = costFunctionReg(initial_theta, X, y, lambda);
+
+%% -- 2.4 Plotting the Nonlinear Decision Boundary: plotDecisionBoundary.m
+
+% This a utility function provided in the course
+% It is interesting to have it since curvy contours are ploted
+% if nonlinear decision boundaries are created,
+% i.e., when we have more than two features.
+
+
+function plotDecisionBoundary(theta, X, y)
+%PLOTDECISIONBOUNDARY Plots the data points X and y into a new figure with
+%the decision boundary defined by theta
+%   PLOTDECISIONBOUNDARY(theta, X,y) plots the data points with + for the 
+%   positive examples and o for the negative examples. X is assumed to be 
+%   a either 
+%   1) Mx3 matrix, where the first column is an all-ones column for the 
+%      intercept.
+%   2) MxN, N>3 matrix, where the first column is all-ones
+
+% Plot Data
+plotData(X(:,2:3), y);
+hold on
+
+if size(X, 2) <= 3
+    % Only need 2 points to define a line, so choose two endpoints
+    plot_x = [min(X(:,2))-2,  max(X(:,2))+2];
+
+    % Calculate the decision boundary line
+    plot_y = (-1./theta(3)).*(theta(2).*plot_x + theta(1));
+
+    % Plot, and adjust axes for better viewing
+    plot(plot_x, plot_y)
+    
+    % Legend, specific for the exercise
+    legend('Admitted', 'Not admitted', 'Decision Boundary')
+    axis([30, 100, 30, 100])
+else
+    % Here is the grid range
+    u = linspace(-1, 1.5, 50);
+    v = linspace(-1, 1.5, 50);
+
+    z = zeros(length(u), length(v));
+    % Evaluate z = theta*x over the grid
+    for i = 1:length(u)
+        for j = 1:length(v)
+            z(i,j) = mapFeature(u(i), v(j))*theta;
+        end
+    end
+    z = z'; % important to transpose z before calling contour
+
+    % Plot z = 0
+    % Notice you need to specify the range [0, 0]
+    contour(u, v, z, [0, 0], 'LineWidth', 2)
+end
+hold off
+
+end
+
+%% -- Optimize & Plot
+
+data = load('ex2data2.txt');
+X = data(:, 1:2); y = data(:, 3);
+
+X = mapFeature(X(:,1), X(:,2));
+
+% Initialize fitting parameters
+initial_theta = zeros(size(X, 2), 1);
+
+% Set regularization parameter lambda to 1 (you should vary this)
+lambda = 1;
+
+% Set Options
+options = optimset('GradObj', 'on', 'MaxIter', 400);
+
+% Optimize
+[theta, J, exit_flag] = fminunc(@(t)(costFunctionReg(t, X, y, lambda)), initial_theta, options);
+
+plotDecisionBoundary(theta, X, y)
+
+```
+
+The following section provides some notes on the python implementation:
+
+
+```python
+
+########
+# It seems that we need to use an advanced optimization method if we want to compute the parameters of logistic regression.
+# In python that can be done with `scipy.optimize`.
+# See the python eercise repository for more information.
+# A brief summary of the code would be the following:
+
+from scipy import optimize
+
+def costFunction(theta, X, y):
+    m = y.size  # number of training examples
+    J = 0
+    grad = np.zeros(theta.shape)
+    # IMPLEMENTATION ...
+    return J, grad
+
+options= {'maxiter': 400}
+# Truncated Newton algorithm (TNC) is equivalent to MATLAB's fminunc
+# See https://stackoverflow.com/questions/18801002/fminunc-alternate-in-numpy
+# jac=True: Jacobian / Gradient returned
+res = optimize.minimize(costFunction,
+                        initial_theta,
+                        (X, y),
+                        jac=True,
+                        method='TNC',
+                        options=options)
+cost = res.fun
+theta = res.x
+
+########
+# The following is the translation of the above functions `mapFeature()` and `plotDecisionBoundary()` to python.
+# The code is from [ml-coursera-python-assignments](https://github.com/mxagar/ml-coursera-python-assignments),
+# forked from dibgerge's repository on Github.
+
+import numpy as np
+from matplotlib import pyplot
+
+def mapFeature(X1, X2, degree=6):
+    """
+    Maps the two input features to quadratic features used in the regularization exercise.
+
+    Returns a new feature array with more features, comprising of
+    X1, X2, X1.^2, X2.^2, X1*X2, X1*X2.^2, etc..
+
+    Parameters
+    ----------
+    X1 : array_like
+        A vector of shape (m, 1), containing one feature for all examples.
+
+    X2 : array_like
+        A vector of shape (m, 1), containing a second feature for all examples.
+        Inputs X1, X2 must be the same size.
+
+    degree: int, optional
+        The polynomial degree.
+
+    Returns
+    -------
+    : array_like
+        A matrix of of m rows, and columns depend on the degree of polynomial.
+    """
+    if X1.ndim > 0:
+        out = [np.ones(X1.shape[0])]
+    else:
+        out = [np.ones(1)]
+
+    for i in range(1, degree + 1):
+        for j in range(i + 1):
+            out.append((X1 ** (i - j)) * (X2 ** j))
+
+    if X1.ndim > 0:
+        return np.stack(out, axis=1)
+    else:
+        return np.array(out)
+
+
+def plotDecisionBoundary(plotData, theta, X, y):
+    """
+    Plots the data points X and y into a new figure with the decision boundary defined by theta.
+    Plots the data points with * for the positive examples and o for  the negative examples.
+
+    Parameters
+    ----------
+    plotData : func
+        A function reference for plotting the X, y data.
+
+    theta : array_like
+        Parameters for logistic regression. A vector of shape (n+1, ).
+
+    X : array_like
+        The input dataset. X is assumed to be  a either:
+            1) Mx3 matrix, where the first column is an all ones column for the intercept.
+            2) MxN, N>3 matrix, where the first column is all ones.
+
+    y : array_like
+        Vector of data labels of shape (m, ).
+    """
+    # make sure theta is a numpy array
+    theta = np.array(theta)
+
+    # Plot Data (remember first column in X is the intercept)
+    plotData(X[:, 1:3], y)
+
+    if X.shape[1] <= 3:
+        # Only need 2 points to define a line, so choose two endpoints
+        plot_x = np.array([np.min(X[:, 1]) - 2, np.max(X[:, 1]) + 2])
+
+        # Calculate the decision boundary line
+        plot_y = (-1. / theta[2]) * (theta[1] * plot_x + theta[0])
+
+        # Plot, and adjust axes for better viewing
+        pyplot.plot(plot_x, plot_y)
+
+        # Legend, specific for the exercise
+        pyplot.legend(['Admitted', 'Not admitted', 'Decision Boundary'])
+        pyplot.xlim([30, 100])
+        pyplot.ylim([30, 100])
+    else:
+        # Here is the grid range
+        u = np.linspace(-1, 1.5, 50)
+        v = np.linspace(-1, 1.5, 50)
+
+        z = np.zeros((u.size, v.size))
+        # Evaluate z = theta*x over the grid
+        for i, ui in enumerate(u):
+            for j, vj in enumerate(v):
+                z[i, j] = np.dot(mapFeature(ui, vj), theta)
+
+        z = z.T  # important to transpose z before calling contour
+        # print(z)
+
+        # Plot z = 0
+        pyplot.contour(u, v, z, levels=[0], linewidths=2, colors='g')
+        pyplot.contourf(u, v, z, levels=[np.min(z), 0, np.max(z)], cmap='Greens', alpha=0.4)
+
+```
