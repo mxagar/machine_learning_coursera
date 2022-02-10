@@ -33,7 +33,7 @@ Example 2: Image classification, 50 x 50 pixels. We consider each pixel an indep
 
 Neural re-wiring experiments with mice have been conducted: visual input was redirected to the auditory cortex and the mice learned to see with that region of the brain. Therefore, the hypothesis that there is one learning algorithm that adapts to the similar hardware pieces has arisen.
 
-Ng provides examples related to how it is possible understand different sensory information with other senses: echolocation, haptic belts, etc.
+Andrew Ng provides examples related to how it is possible understand different sensory information with other senses: echolocation, haptic belts, etc.
 
 Neurons in the brain
 - They have nucleus, which processes the incoming data and sends the output signal.
@@ -83,7 +83,7 @@ Notation:
   - $a$ is the output of a hidden layer neuron; $i = 1, 2, ..$ is the number of the neuron or unit (down); $j = 1, 2, ...$ is number of the layer (up)
 - $\Theta^{(j)}$: matrix of weights controlling the function mapping from layer $j$ to $j+1$
   - rows: units in layer $j+1$ = $s_{j+1}$
-  - columns: units in layer $j$ + 1 (bias) = $s_{j} + 1
+  - columns: units in layer $j$ + 1 (bias) = $s_{j}$ + 1
   - size: $s_{j+1} \times (s_{j} + 1)$ = **new x (old + 1)**
   - $\Theta^{(1)}_3$: row vector for unit 3 in new layer 1+1 = 2.
   - $\Theta^{(1)}_{32}$: weight from old layer unit 2 to new layer unit 3, being the new layer 1+1 = 2
@@ -129,5 +129,22 @@ By having several hidden layers, we can represent very non-linear models, which 
 
 The number of layers, their units, how they are connected and the activation functions are known as the **architecture** of the model.
 
-## 3. Neural Networks: Examples and Applications
+### 2.4 Examples and Applications
+
+Andrew Ng provides examples of how `AND`, `OR` and `NOT` logical functions can be implemented with a very simple perceptron. Then, these perceptrons can be combined to model the more complex logical function `XNOR` (`1` if both inputs are the same); that model uses a hidden layer. The intuition behind is that hidden layers increase the complexity of decisions.
+
+Consider always how the sigmoid function maps the values. Note that `sigmoid(4.6) = 0.99`.
+
+![`OR` logical function with a perceptron](./pics/or_function_perceptron.png)
+
+![`XNOR` logical function with a MLP](./pics/xnor_function_mlp.png)
+
+### 2.5 Multi-Class Classification
+
+When we want to predict one of multiple classes, we use the same *one-vs-all* approach as in logistic regression. Basically, the output layer will have so many `K` units as classes `K` we want to predict, and:
+
+- $h(x) = [h_1, h_2, ..., h_K]^T$
+- If $K = 4$ and the second class is predicted: $h = [0,1,0,0]^T$
+
+The target values or labels represented with the one-hot-encoding notation: $y$ is a column vector of size $K$ with value $1$ in the appropriate class slot, $0$ for the rest.
 
