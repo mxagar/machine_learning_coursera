@@ -63,14 +63,71 @@ A single neuron is called a **perceptron**
 
 ![Representation of a single neuron](./pics/single_neuron.png)
 
-### 2.2 A Nerual Network: Multi-Layered Perceptrons (MLP)
+### 2.2 A Neural Network: Multi-Layered Perceptrons (MLP)
 
-We basically connect the output of a neuron to other neurons, creating a network of layers. We distinguish:
-- The input layer: the input data or variables
+We connect the output of a neuron to other neurons, creating a network of layers. We distinguish:
+
+- The input layer: the input data or variables (layer $j=1$)
 - The output layer: the output signal (it can be one value or several)
 - The hidden layer: all layers of neurons between the input and the output layer
 
 Several layers of perceptrons/neurons are called a **Multi-Layer Perceptrons (MLP)**, and they constitute a neural network.
 
 ![Multi-layer perceptrons (MLP)](./pics/mlp.png)
+
+The effect is that we concatenate vector products mapped with sigmoid or activation functions.
+
+Notation:
+
+- $a_i^{(j)}$: activation of unit $i$ in layer $j$
+  - $a$ is the output of a hidden layer neuron; $i = 1, 2, ..$ is the number of the neuron or unit (down); $j = 1, 2, ...$ is number of the layer (up)
+- $\Theta^{(j)}$: matrix of weights controlling the function mapping from layer $j$ to $j+1$
+  - rows: units in layer $j+1$ = $s_{j+1}$
+  - columns: units in layer $j$ + 1 (bias) = $s_{j} + 1
+  - size: $s_{j+1} \times (s_{j} + 1)$ = **new x (old + 1)**
+  - $\Theta^{(1)}_3$: row vector for unit 3 in new layer 1+1 = 2.
+  - $\Theta^{(1)}_{32}$: weight from old layer unit 2 to new layer unit 3, being the new layer 1+1 = 2
+  - $\Theta^{(1)}_{30}$: weight from bias to new layer unit 3, being the new layer 1+1 = 2
+
+ Therefore:
+
+   - Each layer jump is a matrix of weights: **new x (old + 1)**.
+   - Wach input is the sigmoid of a dot product between a **weight matrix row and previous layer outputs / activations**.
+
+![Neural network model](./pics/neural_network_model.png)
+
+### 2.3 Feed-Forward Propagation: Vectorized Implementation
+
+Feed-forward is the process of passing an input ($x$) to the neural network and obtaining its output ($h(x)$). In between the input is mapped in stages to the output. Each stage is executed after a layer and consists in multiplying the previous activation/layer-output by the weight matrix between the two layers.
+
+Summary of steps:
+- We have our input: $x = [x_1, x_2, x_3, ...]^T$
+- We add the bias components to its front: $x = [x_0, x_1, x_2, x_3, ...]^T$, $x_0 = 1$
+- For generalization, we consider it to be the activation or output from a previous layer: $a^{(1)} = x = [x_0, x_1, x_2, x_3, ...]^T = [a^{(1)}_0, a^{(1)}_1, a^{(1)}_2, a^{(1)}_3, ...]^T$, being layer 1 the input layer. So, basically, $a^{(j)}$ is the input of layer $j$, also known as the activation of layer $j$.
+- We apply the weights to the activations: $z^{(2)} = \Theta^{(1)} a^{(1)} = [z^{(2)}_0, z^{(2)}_1, z^{(2)}_2, ...]^{T}$
+- We apply the sigmoid activation function to each element of the vector $z$ to obtain the activations from layer 2: $a^{(2)} = g(z^{(2)}) = [a^{(2)}_0, a^{(2)}_1, a^{(2)}_2, a^{(2)}_3, ...]^T$
+- The process is repeated until we reach the output layer $k$: $h(x) = g(z^{(k)})$
+
+![Feed-forward propagation in a vectorized form](./pics/feed_forward.png)
+
+Some remarks:
+- $x$ is input vector and we need to insert the bias component to it: $x_0 = 1$
+- We need to extend the every activation vector with the bias components in the front, too: $a^{(j)}_0 = 1$
+- $a$ is the activation or output after applying the sigmoid; in the case of the input $a^{(1)} = x$
+- $z^{(j+1)} = \Theta^{(j)} a^{(j)}$: dot product between weights and activations
+- $a^{(j)} = g(z^{(j)})$: the activations are the result of applying the sigmoid to the $z$ vector; applying the sigmoid to a vector is the equivalent to applying the sigmoid to each of its components separately (element-wise) and assembling a new vector of equal size
+- $h(x)$: the complete model; if we have $k$ layers (input layer is 1), then $h(x) = a^{(k)}= g(z^{(k)})$
+- Note that if the output layer has only one unit, $\Theta$ is a row vector!
+
+#### Interpretation and Architecture
+
+Each layer of a neural network is a logistic regression model.
+The features of the model in each layer are the outputs/activations of the previous layer.
+Therefore, the neural network learns which intermediate features to generate by adjusting its weights.
+
+By having several hidden layers, we can represent very non-linear models, which gives us a lot of flexibility.
+
+The number of layers, their units, how they are connected and the activation functions are known as the **architecture** of the model.
+
+## 3. Neural Networks: Examples and Applications
 
