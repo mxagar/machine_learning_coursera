@@ -36,14 +36,21 @@ grad = zeros(size(theta));
 %           grad = grad + YOUR_CODE_HERE (using the temp variable)
 %
 
-
-
-
-
-
-
-
-
+% Number features
+n = size(X,2);     
+% Cost
+z = X*theta; % (m x n) x (n x 1) -> (m x 1)
+h = sigmoid(z); % m x 1
+J = (-1.0/m)*(y'*log(h) + (1.-y)'*log(1.-h));
+% Cost Regularization
+J = J + (0.5*lambda/m)*theta(2:n)'*theta(2:n)
+% Gradient
+e = (h-y); % m x 1
+grad = (1.0/m)*X'*e; % (n x m) x (m x 1) -> (n x 1)
+% Gradient Regularization
+reg = (lambda/m)*theta;
+reg(1) = 0;
+grad = grad + reg;
 
 % =============================================================
 
