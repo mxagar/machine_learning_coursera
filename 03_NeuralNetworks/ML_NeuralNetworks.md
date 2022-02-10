@@ -148,3 +148,50 @@ When we want to predict one of multiple classes, we use the same *one-vs-all* ap
 
 The target values or labels represented with the one-hot-encoding notation: $y$ is a column vector of size $K$ with value $1$ in the appropriate class slot, $0$ for the rest.
 
+## 3. Exercise 3
+
+Hand-written digits recognition with (part 1) multi-class logistic regression and (part 2) neural networks.
+
+I completed the official exercises in Octave:
+
+`../exercises/ex1-ex8-octave/ex3`
+
+However, I forked also a python version of the exercises that can be used for submission also!
+
+`~/git_repositories/ml-coursera-python-assignments`
+
+[ml-coursera-python-assignments](https://github.com/mxagar/ml-coursera-python-assignments)
+
+Files provided by Coursera, located under `../exercises/ex1-ex8-octave/ex3`
+
+- `ex3.m` - Octave/MATLAB script that steps you through part 1
+- `ex3_nn.m` - Octave/MATLAB script that steps you through part 2
+- `ex3data1.mat` - Training set of hand-written digits
+- `ex3weights.mat` - Initial weights for the neural network exercise
+- `submit.m` - Submission script that sends your solutions to our servers
+- `displayData.m` - Function to help visualize the dataset
+- `fmincg.m` - Function minimization routine (similar to `fminunc`)
+- `sigmoid.m` - Sigmoid function
+
+Files to complete:
+
+- `lrCostFunction.m` - Logistic regression cost function
+- `oneVsAll.m` - Train a one-vs-all multi-class classifier
+- `predictOneVsAll.m` - Predict using a one-vs-all multi-class classifier
+- `predict.m` - Neural network prediction function
+
+Workflow:
+
+- Download latest Octave version of exercise from Coursera
+- Complete code in exercise files following `ex3.pdf`
+- Whenever an exercise part is finished
+  - Check it with `ex3` or `ex3_nn` in Octave terminal
+  - Create a submission token on Coursera (exercise submission page, it lasts 30 minutes)
+  - Execute `submit` in Octave terminal
+  - Introduce email and token
+  - Results appear
+
+**Overview of contents:**
+
+0. Setup: `gnuplot`
+1. Part 1: Multi-Class Logistic Regression
