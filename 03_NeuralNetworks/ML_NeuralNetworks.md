@@ -197,3 +197,217 @@ Workflow:
 
 0. Setup: `gnuplot`
 1. Part 1: Multi-Class Logistic Regression
+    - 1.1 Dataset Loading & Visualization
+    - 1.2 Vectorized Logistic Regression: `lrCostFunction.m`
+    - 1.3 Regularized & Vectorized Logistic Regression: `lrCostFunction.m`
+    - 1.4 One-vs-All Classification: `oneVsAll.m`
+    - 1.5 One-vs-All Prediction: `predictOneVsAll.m`
+2. Part 2: Neural Networks
+    - 2.1 Loading the Data: Pre-Trained Weights2.1 Loading the Data: Pre-Trained Weights
+    - 2.2 Feedforward Propagation and Prediction: `predict.m`2.2 Feedforward Propagation and Prediction: `predict.m`
+
+```octave
+%%%%% --- 0. Setup: `gnuplot`
+
+graphics_toolkit ("gnuplot");
+%plot -b inline:gnuplot
+
+%%%%% --- 1. Part 1: Multi-Class Logistic Regression
+
+%% -- 1.1 Dataset Loading & Visualization
+
+% Load saved matrices from file
+load('ex3data1.mat');
+% The matrices X and y will now be in your Octave environment
+
+% Show variables in workspace
+who
+
+% X: 5000 examples of unrolled 20x20 pixel images containing hand-written digits
+% pixels contain grayscale intensities
+size(X)
+
+% y: true label for each example: 1-9, 10:0 (label 10 means digit 0)
+size(y)
+
+% Check min and max values
+disp([max(X(1,:)),min(X(1,:))])
+disp([max(y(:)),min(y(:))])
+
+% Randomly select 100 data points to display
+m = size(X, 1);
+rand_indices = randperm(m);
+num = 10; % num^2 images are visualized in a tiled canvas
+sel = X(rand_indices(1:num^2), :);
+
+% Function provided in the course
+% See how sel is created
+% Otherwise, the numer of tiles in the image width can be passed as param (see function)
+displayData(sel);
+
+%% -- 1.2 Vectorized Logistic Regression: `lrCostFunction.m`
+
+function g = sig(z)
+    g = 1.0 ./ (1.0 + exp(-z));
+end
+
+% X -> must be extended with bias x_0 = 1
+% y -> one class vs. rest: this must be arranged
+function [J, grad] = costFunction(theta, X, y, lambda)
+    % Number of training examples
+    m = length(y); 
+    % Initialize return variables
+    J = 0;
+    grad = zeros(size(theta));
+    % sigmoid(z): g = 1.0 ./ (1.0 + exp(-z));
+    z = X*theta; % (m x n) x (n x 1) -> (m x 1)
+    h = sig(z); % m x 1
+    J = (-1.0/m)*(y'*log(h) + (1.-y)'*log(1.-h));
+    e = (h-y); % m x 1
+    grad = (1.0/m)*X'*e; % (n x m) x (m x 1) -> (n x 1)
+end
+
+%% -- 1.3 Regularized & Vectorized Logistic Regression: `lrCostFunction.m`
+
+% X (m x (n+1)) -> must be extended with bias x_0 = 1
+% y (m x 1) -> one class vs. rest: this must be arranged
+function [J, grad] = costFunctionReg(theta, X, y, lambda)
+    % Number of training examples
+    m = length(y); 
+    % Number features
+    n = size(X,2);     
+    % Initialize return variables
+    J = 0;
+    grad = zeros(size(theta));
+    % sigmoid(z): g = 1.0 ./ (1.0 + exp(-z));
+    z = X*theta; % (m x n) x (n x 1) -> (m x 1)
+    h = sig(z); % m x 1
+    J = (-1.0/m)*(y'*log(h) + (1.-y)'*log(1.-h));
+    % Cost Regularization
+    J = J + (0.5*lambda/m)*theta(2:n)'*theta(2:n)
+    % Gradient
+    e = (h-y); % m x 1
+    grad = (1.0/m)*X'*e; % (n x m) x (m x 1) -> (n x 1)
+    % Gradient Regularization
+    reg = (lambda/m)*theta;
+    reg(1) = 0;
+    grad = grad + reg;
+end
+
+%% -- 1.4 One-vs-All Classification: `oneVsAll.m`
+
+% A custom optimization function (provided) is used
+% Basically one model (i.e., a set of params theta) is fitted for each class: one vs. all
+function [all_theta] = fitAll(X, y, num_labels, lambda)
+    %   [all_theta] = fitAll(X, y, num_labels, lambda) trains num_labels
+    %   logistic regression classifiers and returns each of these classifiers
+    %   in a matrix all_theta, where the i-th row of all_theta corresponds 
+    %   to the classifier for label i
+
+    % Sizes
+    m = size(X, 1);
+    n = size(X, 2);
+
+    % Initialization of the return variables
+    all_theta = zeros(num_labels, n + 1);
+
+    % Add ones to the X data matrix: bias
+    X = [ones(m, 1) X];
+
+    % Hints & notes:
+    % - theta(:) column vector.
+    % - y == c: vector of 1's and 0's that tell you
+    % - use fmincg to optimize the cost in a for loop
+    %
+    % Example code for fmincg:
+    %
+    %     % Set Initial theta
+    %     initial_theta = zeros(n + 1, 1);
+    %     % Set options for fminunc
+    %     options = optimset('GradObj', 'on', 'MaxIter', 50);
+    %     % Run fmincg to obtain the optimal theta
+    %     % This function will return theta and the cost 
+    %     [theta, J, iterations] = fmincg(@(t)(costFunctionReg(t, X, (y == c), lambda)), initial_theta, options);
+
+    initial_theta = zeros(n + 1, 1);
+    options = optimset('GradObj', 'on', 'MaxIter', 50);
+    
+    for c = 1:num_labels
+        %[theta, J, iterations] = fmincg(@(t)(lrCostFunction(t, X, (y == c), lambda)), initial_theta, options);
+        [theta, J, iterations] = fmincg(@(t)(costFunctionReg(t, X, (y == c), lambda)), initial_theta, options);
+        %[theta, J, exit_flag] = fminunc(@(t)(costFunctionReg(t, X, y, lambda)), initial_theta, options); = fminunc(@(t)(costFunctionReg(t, X, y, lambda)), initial_theta, options);        all_theta(c,:) = theta(:)';
+        all_theta(c,:) = theta(:)';
+    end
+
+end
+
+num_labels = 10;
+lambda = 0.1;
+
+[all_theta] = fitAll(X, y, num_labels, lambda);
+
+%% -- 1.5 One-vs-All Prediction: `predictOneVsAll.m`
+
+function p = inferOneVsAll(all_theta, X)
+    % Sizes
+    m = size(X, 1); % X: m x n = examples x pixels/features
+    num_labels = size(all_theta, 1); % all_theta: k x (n+1) = classes x (pixels/features + 1)
+    % Initalize return variables
+    p = zeros(size(X, 1), 1); % m x 
+    % Add ones to the X data matrix: bias
+    X = [ones(m, 1) X]; % m x (n+1)
+    % Apply model
+    P = X*all_theta'; % (m x (n+1)) x ((n+1) x k) -> m x k
+    P = sig(P);
+    [v, p] = max(P,[],2); % maximum column-value (v) and column-index (p) for each row
+end
+
+p = inferOneVsAll(all_theta, X);
+
+% Accuracy
+a = y == p;
+sum(a)/length(a)
+
+%%%%% --- 2. Part 2: Neural Networks
+
+%% -- 2.1 Loading the Data: Pre-Trained Weights2.1 Loading the Data: Pre-Trained Weights
+
+% Load saved matrices from file
+load('ex3weights.mat');
+
+who
+% The matrices Theta1 and Theta2 will now be in your Octave environment
+% Theta1 has size 25 x 401
+% Theta2 has size 10 x 26
+
+size(Theta1) # layer 1 -> layer 2
+size(Theta2) # layer 2 -> layer 3
+
+%% -- 2.2 Feedforward Propagation and Prediction: `predict.m`2.2 Feedforward Propagation and Prediction: `predict.m`
+
+function p = infer(Theta1, Theta2, X)
+    % Sizes
+    m = size(X, 1);
+    num_labels = size(Theta2, 1);
+    % Initialize return variable: predictions
+    p = zeros(size(X, 1), 1);
+    % Layer 1
+    a1 = [ones(size(X,1),1), X]; % 5000 x 401
+    % Layer 1 -> Layer 2
+    z2 = a1*Theta1'; % (5000 x 401) x (401 x 25) -> (5000 x 25)
+    a2 = sig(z2);
+    a2 = [ones(size(a2,1),1), a2]; % bias -> (5000 x 26)
+    % Layer 2 -> Layer 3
+    z3 = a2*Theta2'; % (5000 x 26) x (26 x 10) -> (5000 x 10)
+    a3 = sig(z3);
+    % Select class
+    [v, p] = max(a3,[],2); % maximum column-value (v) and column-index (p) for each row
+end
+
+p = infer(Theta1, Theta2, X);
+
+% Accuracy
+a = y == p;
+sum(a)/length(a)
+
+```
