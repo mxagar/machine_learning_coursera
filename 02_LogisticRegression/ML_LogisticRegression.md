@@ -494,6 +494,7 @@ Workflow:
     - 1.1 Visualizing the Data: `plotData.m`
     - 1.2. Sigmoid Function: `sigmoid.m`
     - 1.3. Cost Function and Gradient: `costFunction.m`
+      - 1.3.1 Python Notes: Vectors and Matrices with `numpy`
     - 1.4. Optimization
         - 4.1 Gradient Descent: It does not work right away
         - 4.2 Advanced Optimization with `fminfunc`
@@ -751,6 +752,40 @@ The following section provides some notes on the python implementation:
 
 
 ```python
+
+########
+# Working with Vector and Matrices
+# The implementation with python would be done using `numpy`.
+# The following are some particular properties of `numpy` we should bear in mind
+
+import numpy as np
+
+# Array / vector: no rows/columns, just length!
+x = np.array([1, 2, 3])
+
+# Matrix
+np.array([[1, 2, 3], [4, 5, 6]])
+
+# Scalar product between vectors
+np.dot(x, x)
+
+# Matrix multiplication
+# X: m x n
+# y: vector length m
+np.dot(y, X) # y considered 1 x m
+np.dot(X, y) # y considered m x 1
+
+# Vectors can be promoted to matrices
+y = np.array([1, 2, 3]) # length 3
+y[None, :] # 1 x 3
+y[:, None] # 3 x 1
+
+# Get matrix sizes
+m, n = X.shape
+
+# Extend matrix with a column of ones
+X = np.concatenate([np.ones((m, 1)), X], axis=1)
+
 
 ########
 # It seems that we need to use an advanced optimization method if we want to compute the parameters of logistic regression.
