@@ -532,6 +532,8 @@ However, I forked also a python version of the exercises that can be used for su
 
 [ml-coursera-python-assignments](https://github.com/mxagar/ml-coursera-python-assignments)
 
+There are some relevant summary notes on `../02_LogisticRegression/ML_LogisticRegression.md` related to the python implementation.
+
 All in all, we have two exercises:
 1. Restaurant franchise trying to decide where to open next. Data: Profits vs. Habitants. (Compulsory).
 2. House price model. Data size (square feet) & number of bedrooms vs. price (Optional).
