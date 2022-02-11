@@ -162,6 +162,8 @@ However, I forked also a python version of the exercises that can be used for su
 
 [ml-coursera-python-assignments](https://github.com/mxagar/ml-coursera-python-assignments)
 
+There are some relevant summary notes on `../02_LogisticRegression/ML_LogisticRegression.md` related to the python implementation.
+
 Files provided by Coursera, located under `../exercises/ex1-ex8-octave/ex3`
 
 - `ex3.m` - Octave/MATLAB script that steps you through part 1
