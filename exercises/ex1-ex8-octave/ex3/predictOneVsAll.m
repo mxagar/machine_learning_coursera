@@ -8,14 +8,13 @@ function p = predictOneVsAll(all_theta, X)
 %  of values from 1..K (e.g., p = [1; 3; 1; 2] predicts classes 1, 3, 1, 2
 %  for 4 examples) 
 
-m = size(X, 1);
-num_labels = size(all_theta, 1);
-
-% You need to return the following variables correctly 
-p = zeros(size(X, 1), 1);
-
-% Add ones to the X data matrix
-X = [ones(m, 1) X];
+% Sizes
+m = size(X, 1); % X: m x n = examples x pixels/features
+num_labels = size(all_theta, 1); % all_theta: k x (n+1) = classes x (pixels/features + 1)
+% Initalize return variables
+p = zeros(size(X, 1), 1); % m x 
+% Add ones to the X data matrix: bias
+X = [ones(m, 1) X]; % m x (n+1)
 
 % ====================== YOUR CODE HERE ======================
 % Instructions: Complete the following code to make predictions using
@@ -30,11 +29,9 @@ X = [ones(m, 1) X];
 %       for each row.
 %       
 
-
-
-
-
-
+% Apply model
+P = X*all_theta'; % (m x (n+1)) x ((n+1) x k) -> m x k
+[v, p] = max(P,[],2); % maximum column-value (v) and column-index (p) for each row
 
 % =========================================================================
 
