@@ -31,6 +31,7 @@ X = [ones(m, 1) X]; % m x (n+1)
 
 % Apply model
 P = X*all_theta'; % (m x (n+1)) x ((n+1) x k) -> m x k
+P = sigmoid(P);
 [v, p] = max(P,[],2); % maximum column-value (v) and column-index (p) for each row
 
 % =========================================================================
