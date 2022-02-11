@@ -13,8 +13,16 @@ An alternative would be to use Asciidoc, but rendering of equations is not strai
 Overview of contents:
 
 1. Motivations
-2. Neural Networks
-3. Applications
+   - 1.1 Non-Linear Hypotheses
+   - 1.2 Neurons and the Brain
+2. Neural Networks: Model Representation
+   - 2.1 A Single Neuron: A Perceptron
+   - 2.2 A Neural Network: Multi-Layered Perceptrons (MLP)
+   - 2.3 Feed-Forward Propagation: Vectorized Implementation
+     - Interpretation and Architecture
+   - 2.4 Examples and Applications
+   - 2.5 Multi-Class Classification
+3. Exercise 3 (Week 4): Octave code summary
 
 
 ## 1. Motivations
