@@ -538,3 +538,46 @@ Note also that the error components of the bias units can be computed (and proba
 
 ### 5.1 Unrolling Parameters
 
+The cost function computation yields the total cost `J` and matrix for each layer `D`, which is the derivative of the cost with respect to each weight (& bias) in that layer.
+However, the minimization functions usually work with a vectorial gradient representations; therefore, the gradient and weight matrices need to be unrolled and stacks in a column vector and then re-arranged back to matrix form in each backpropagation pass.
+
+In the following, some Octave lines show how to do that:
+
+```octave
+
+% Cost Function
+% J: scalar
+% gradient: n x 1, n parameters (weights and biases)
+function [J, gradient] = costFunction(theta)
+
+% Optimization Function
+optTheta = fminunc(@costFunction, initialTheta, options)
+
+% Unroll theta and gradient: from matrix to vector (column)
+thetaVec = [ Theta1(:); Theta2(:); Theta3(:)];
+DVec = [D1(:); D2(:); D3(:)];
+
+% Re-arrange theta and gradient: from vector to matrix
+% Example:
+% L = 4 layers
+% Theta1, D1: 10 x 11 (l = 1, s = 10, 1 bias)
+% Theta2, D2: 10 x 11 (l = 2, s = 11, 1 bias)
+% Theta3, D3: 1 x 11 (l = 3, s = 1, 1 bias)
+Theta1 = reshape(thetaVec(1:110),10,11);
+Theta2 = reshape(thetaVec(111:220),10,11);
+Theta3 = reshape(thetaVec(221:231),1,11);
+
+```
+
+Therefore, the training/learning algorithm has these steps:
+
+- We define the initial params/weights as matrices: `ThetaX`
+- We unroll them to the vector `initialTheta`
+- We call our optimization function with `initialTheta` and `costFunction(thetaVec)`
+- Inside `function [J, gradient] = costFunction(thetaVec)`
+  - We reshape `thetaVec` to be the matrices `ThetaX`
+  - Perform feedforward + backpropagation to compute `DX` matrices and the cost `J`
+  - We unroll the `DX` matrices to be the column vector `gradient`
+
+The advantage of the matrix representation is that we can very easily perform operations with a vectorized syntax. However, optimization functions usually assume that the gradient is a vector.
+
