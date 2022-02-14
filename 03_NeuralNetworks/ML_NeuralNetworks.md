@@ -26,6 +26,7 @@ Overview of contents:
 4. Neural Network: Cost Function and Backpropagation
    - 4.1 Cost Function
    - 4.2 Backpropagation Algorithm
+     - Intuition of the Backpropagation
 5. Neural Networks: Backpropagation in Practice
    - 5.1 Unrolling Parameters
    - 5.2 Gradient Checking
@@ -429,4 +430,111 @@ sum(a)/length(a)
 
 ```
 
-## 4. Neural Network: Cost Function
+## 4. Neural Network: Cost Function and Backpropagation
+
+### 4.1 Cost Function
+
+The cost function $J(\theta)$ of a neural network for classification is equivalent to the cost function of the logistic regression. However, with some notes caveats:
+
+- The logistic regression is like a perceptron with one layer; with neural networks we have several layers. We denote the total number of layers `L` and the layer counter `l`. The number of neuron units in each layer is `s_l`: $L$, $l$, $s_l$.
+- Neural networks have in general several `K` classes, thus we have `K` output prediction units that form the inference function $h(x)$ of dimension `K x 1`; each of the `K` values is `[0,1]`. The value assigned to each class `k` is denoted as $y_k$ and/or $h_k$.
+- A parameter is denoted as $\theta_{ji}^{(l)}$: we need to derive the cost $J$ with respect to each of all those parameters; note that
+  - $l$ is the layer number, from 1 to $L-1$ (because the last layer does not continue applying weights)
+  - $j$ unit id from layer $l + 1$ (where it goes): $1 ... s_{l+1}$
+  - $i$ unit id from layer $l$ (where it is coming from): $1 ... s_{l}$; do not mix it with the training example $i$!
+- The regularization term takes into account all parameters $\theta_{ji}^{(l)}$, except the biases! Thus $i$ will start in the regularization term with 1.
+
+![Classification Neural Network: Cost Function](./pics/neural_network_classification_cost.png)
+
+### 4.2 Backpropagation
+
+The backpropagation algorithm is used to minimize the cost function.
+The idea is that we compute the gradient of the cost function propagating and differentiating the error in a backward pass.
+We do that for all samples and accumulate the total gradient in an epoch.
+
+So, the steps are roughly:
+
+1. Pick one example `(x,y)`
+2. Feedforward the example to obtain `h`
+3. Compute the error in the output layer: `delta^(L) = y - h`
+4. Feed backward that error to obtain the error of each layer: the error of each layer is a vector of the same size as the number of units/neurons in the layer.
+5. Compute the differentiated matrix of the error vector to obtain the error gradient, which can be shown to be `error * activation`; this is a matrix of the same size as the weight or parameter matrix.
+6. Take the next example from the dataset and repeat from step 1; accumulate the error gradient in each layer by summing them example after example. When all examples have been passed, the sum over all examples of all error gradient matrices in each layer yields the final gradient.
+
+That process is formally detailed in the following images.
+
+**Feedforward of an example**:
+
+Given an example `(x,y)`, we pass it through the network to get the final activation vector $a^{(L)} = h(x)$, which infers $y$.
+
+![Backpropagation: Feedfoward](./pics/nn_brackpropagation_feedforward.png)
+
+**Error computation**:
+
+The error of the inference is $\delta = h - y$. Note that $\delta$ is a vector and each component is related to one of the last neurons.
+That error can be passed backward through the network computing the error components of unit in each layer.
+
+That is accomplished with the following formula:
+
+$\delta^{(l)} = ((\Theta^{(l)})\delta^{(l+1)}).*a^{(l)}.*(1-a^{(l)})$
+
+With
+- $.*$ is the element-wise multiplication operator
+- $g'(z^{(l)}) = a^{(l)}.*(1-a^{(l)})$
+
+Thus, starting with $\delta^{(L)} = h - y$, we compute backwards:
+
+$\delta^{(L-1)}$, $\delta^{(L-2)}$, ..., $\delta^{(2)}$.
+
+There is no $\delta^{(1)}$, because we cannot associate the error term with the input layer.
+
+![Backpropagation: Error](./pics/nn_brackpropagation_error.png)
+
+**Backpropagation**:
+
+Finally, we compute the gradient of each weight/parameter. Each $\Theta^{(l)}_{i,j}$ is associated to a $\Delta^{(l)}_{i,j}$ forming a matrix of the same size:
+
+$\Delta^{(l)}_{i,j} := \Delta^{(l)}_{i,j} + a^{(l)}_{j}\delta^{(l+1)}_{i}$
+
+With vectorization:
+
+$\Delta^{(l)} := \Delta^{(l)} + \delta^{(l+1)} (a^{(l)})^{T}$
+
+Note that $\delta$ and $a$ are `s x 1`, being `s` the number of units in the respective layer.
+
+We add the regularization term to those $\Delta^{(l)}_{i,j}$ and normalize them with the number of samples $m$; that leads to the $D^{(l)}_{i,j}$, which is the gradient of $J$ with respect to the weight $\Theta^{(l)}_{i,j}$:
+
+
+$$ \frac{\partial J}{\partial\Theta^{(l)}_{i,j}} = D^{(l)}_{i,j} $$
+
+Note: in the figure that follows, the superindex $(i)$ refers to the example, whereas the subindex $i$ refers to the number of unit in a layer, as $j$. That unfortunate notation is quite confusing.
+
+![Backpropagation: Algorithm](./pics/nn_brackpropagation_algorithm.png)
+
+#### Intuition of the Backpropagation
+
+If we develop the formula for the computation of $\delta$
+
+$\delta^{(l)} = ((\Theta^{(l)})\delta^{(l+1)}).*a^{(l)}.*(1-a^{(l)})$
+
+we can see that we are actually feeding the inference error $\delta^{(L)}$ backwards in the network to obtain the error of each layer!
+
+Look carefully at the image, but note there are some errors; corrections:
+
+$\delta_1^{(4)} = a^{(4)}  - y^{(4)}$
+
+$\textrm{cost}(i) = y^{(i)}\log(h(x^{(i)})) + (1 - y^{(i)})\log(1 - h(x^{(i)}))$
+
+The most important messages are two:
+
+1. The backpropagation of the error, e.g.: $\delta_{2}^{(2)} = \theta_{12}^{(2)}\delta_{1}^{(3)} + \theta_{22}^{(2)}\delta_{2}^{(3)}$
+2. The $\delta$ component is the derivative of the cost with respect to the respective $z$ mapping.
+
+Note also that the error components of the bias units can be computed (and probably are computed as a byproduct of a vectorial formulation): $\delta_0^{(l)}$; however, these values are not used later on, since the bias value remains always 1. I understand, though, that the weights associated to those biases are updated: $\theta_{i0}^{(l)}$
+
+![Backpropagation: Intuition](./pics/nn_backpropagation_intuition.png)
+
+## 5. Neural Networks: Backpropagation in Practice
+
+### 5.1 Unrolling Parameters
+
