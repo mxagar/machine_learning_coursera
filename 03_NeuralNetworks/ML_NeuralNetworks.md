@@ -23,7 +23,16 @@ Overview of contents:
    - 2.4 Examples and Applications
    - 2.5 Multi-Class Classification
 3. Exercise 3 (Week 4): Octave code summary
-
+4. Neural Network: Cost Function and Backpropagation
+   - 4.1 Cost Function
+   - 4.2 Backpropagation Algorithm
+5. Neural Networks: Backpropagation in Practice
+   - 5.1 Unrolling Parameters
+   - 5.2 Gradient Checking
+   - 5.3 Random Initialization
+   - 5.4 Summary
+6. Application of Neural Networks
+7. Exercise 4 (Week 5): Octave code summary
 
 ## 1. Motivations
 
@@ -419,3 +428,5 @@ a = y == p;
 sum(a)/length(a)
 
 ```
+
+## 4. Neural Network: Cost Function
