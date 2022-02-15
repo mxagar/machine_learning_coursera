@@ -581,3 +581,91 @@ Therefore, the training/learning algorithm has these steps:
 
 The advantage of the matrix representation is that we can very easily perform operations with a vectorized syntax. However, optimization functions usually assume that the gradient is a vector.
 
+### 5.2 Gradient Checking
+
+It is easy to introduce such confusing bugs to backpropagation, that the cost function seems to be decreasing during optimization, even though it is in reality increasing. To avoid such situations, **numerical gradient checking** is very useful.
+
+The gradient can be aproximated by computing the difference of the cost in a close neighborhood or radius `epsilon`:
+
+```
+gradApprox = (J(theta + epsilon) - J(theta - epsilon))/(2*epsilon)
+```
+
+Note that a double sided neighborhood (`+-epsilon`) is more stable than a single sided one.
+
+We basically vectorize the `theta` weights and inflate one by one each components to obtain the cost derivative of each of the weights:
+
+```octave
+
+epsilon = 1e-4;
+gradApprox = zeros(n,1);
+for i = 1:n,
+  thetaPlus = theta;
+  thetaPlus(i) += epsilon;
+  thetaMinus = theta;
+  thetaMinus(i) -= epsilon;
+  gradApprox(i) = (J(thetaPlus) - J(thetaMinus))/(2*epsilon)
+end;
+
+```
+
+Then, we compare that `gradApprox ~ DVec`, with a difference of few decimal places; if so, our backpropagation algorithm is correct.
+
+However, the computation of `gradApprox` must be done in a testing phase only, not during training, because it is much more expensive than computing the gradients through backpropagation. So make sure we switch it off before training!
+
+### 5.3 Random Initialization
+
+If the weights are initialized to zero, we end up having a weight symmetry issue:
+
+- The activations of the hidden units end up being the same
+- After an update, the weights coming out from each unit end up being the same constant; thus, again, we have equal activations in hidden layers
+- Thus, as we keep training, the weights change, but all hidden units compute the same feature!
+- That is a waste of resources: we have many units, but all model the same features, so we are not learning efficiently!
+
+The solution is **symmetric breaking**: we initialize theta values each with a random number in the region `[-init_epsilon, init_epsilon]`:
+
+```octave
+Theta1 = rand(10,11) * (2 * INIT_EPSILON) - INIT_EPSILON;
+Theta2 = rand(10,11) * (2 * INIT_EPSILON) - INIT_EPSILON;
+Theta3 = rand(1,11) * (2 * INIT_EPSILON) - INIT_EPSILON;
+```
+
+### 5.4 Summary
+
+Applying neural networks.
+
+First, we need to choose an architecture, which is defined by the layers, units, and their connectivity:
+
+- Number of input units = dimension of features $x$
+- Number of output units = number of classes
+- Number of hidden units per layer = usually more the better (must balance with cost of computation as it increases with more hidden units)
+- Number of hidden layers: default, 1 hidden layer. If you have more than 1 hidden layer, then it is recommended that you have the same number of units in every hidden layer.
+
+Second, we implement the training/learning algorithm:
+
+- Implement forward propagation to get $h(x)$
+- Implement the cost function
+- Implement backpropagation to compute partial derivatives
+- Implement gradient checking to confirm that your backpropagation works. Then disable gradient checking.
+
+Third, we perform the training:
+
+- Randomly initialize the weights
+- Use gradient descent or a built-in optimization function to minimize the cost function with the weights in theta.
+
+Note that in practice, we compute both the cost and its gradient in the `costFunction()`, which requires performing `feedForward()` and `backPropagation()` for each of the examples `m`. So the procedure is:
+
+```
+for i = 1:m % examples
+  feedForward() -> h(x(i))
+  backPropagation() -> activations(l), deltas(l) for each layer l = L, ..., 2
+  accumulate gradient values from activations(l), deltas(l) for each weight & bias
+```
+   
+## 6. Application of Neural Networks
+
+Autonomous Driving, from the Carnegie Mellon University.
+A car that learns to drive with a 3 layer network and 30x30 grayscale images.
+The steering wheel angle is predicted.
+
+Video courtesy of Dean Pomerleau; a [related video on on Youtube](https://www.youtube.com/watch?v=bdQ5rsVgPuk).
