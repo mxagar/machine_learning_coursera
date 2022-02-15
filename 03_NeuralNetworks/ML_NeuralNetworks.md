@@ -669,3 +669,6 @@ A car that learns to drive with a 3 layer network and 30x30 grayscale images.
 The steering wheel angle is predicted.
 
 Video courtesy of Dean Pomerleau; a [related video on on Youtube](https://www.youtube.com/watch?v=bdQ5rsVgPuk).
+
+## 7. Exercise 4 (Week 5)
+
