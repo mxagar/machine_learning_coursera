@@ -675,3 +675,250 @@ Video courtesy of Dean Pomerleau; a [related video on on Youtube](https://www.yo
 
 ## 7. Exercise 4 (Week 5)
 
+Hand-written digits recognition with neural networks, focussing on the backpropagation algorithm for gradient computation and learning. The digits are a subset of the [MNIST dataset](http://yann.lecun.com/exdb/mnist/) by Yann LeCun.
+
+Files provided by Coursera, located under `../exercises/ex1-ex8-octave/ex4`
+
+- `ex4.m` - Octave/MATLAB script that steps you through the exercise
+- `ex4data1.mat` - Training set of hand-written digits
+- `ex4weights.mat` - Initial weights for the neural network
+- `submit.m` - Submission script that sends your solutions to our servers
+- `displayData.m` - Function to help visualize the dataset
+- `fmincg.m` - Function minimization routine (similar to `fminunc`)
+- `sigmoid.m` - Sigmoid function
+- `computeNumericalGradient.m` - Numerically compute gradients
+- `checkNNGradients.m` - Function to help check your gradients
+- `debugInitializeWeights.m` - Function for initializing weights
+- `predict.m` - Neural network prediction function
+
+
+Files to complete:
+
+- `sigmoidGradient.m` - Compute the gradient of the sigmoid function
+- `randInitializeWeights.m` - Randomly initialize weights
+- `nnCostFunction.m` - Neural network cost function
+- `predict.m` - Neural network prediction function
+
+Workflow:
+
+- Download latest Octave version of exercise from Coursera
+- Complete code in exercise files following `ex4.pdf`
+- Whenever an exercise part is finished
+  - Check it with `ex4` in Octave terminal
+  - Create a submission token on Coursera (exercise submission page, it lasts 30 minutes)
+  - Execute `submit` in Octave terminal
+  - Introduce email and token
+  - Results appear
+
+**Overview of contents:**
+
+0. Setup: `gnuplot`
+1. Dataset Loading & Visualization
+2. Model
+3. Feedforward and Cost Function: `nnCostFunction.m`
+    - 3.1 Feedforward
+    - 3.2 Cost Function
+    - 3.3 Regularized Cost Function
+4. Backpropagation: `nnCostFunction.m`
+    - 4.1 Sigmoid Gradient: `sigmoidGradient.m`
+    - 4.2 Random Initialization: `randInitializeWeights.m`
+    - 4.3 Backpropagation
+    - 4.4 Gradient Checking: `computeNumericalGradient.m`
+5. Training: `ex4.m`
+6. Evaluation / Inference: `predict.m`
+7. Visualization of the Hidden Layer Weights
+8. Python Notes
+
+It is recommended to ahe a look at the notebook, because images and formulas are displayed in it.
+Here, the most important code pieces are shown.
+Have a look at the python notes notebook if necessary, but I think no new concepts are introduced.
+
+```octave
+
+%%% --- Helper Functions
+
+function W = randInitializeWeights(L_in, L_out)
+  % Xavier Glorot Initialization for symmetry breaking for each layer $l$ or weight matrix \theta^{(l)}
+  % should be a uniform distribution with the following radius \epsilon,
+  % function of the number of units $s$ in adjacent layers to $\theta^{(l)}$:
+  % \epsilon_{init} = \frac{\sqrt{6}}{\sqrt{s_l + s_{l+1}}}
+  % [-\epsilon_{init}, \epsilon_{init}]
+  %
+  % However, the epsilon value is fixed to 0.12 in the exercises
+  epsilon_init = 0.12;
+  W = rand(L_out, 1 + L_in)*2*epsilon_init;
+  W = W - epsilon_init;
+end
+
+function g = sigmoidGradient(z)
+    g = zeros(size(z));
+    g = sigmoid(z).*(1 .- sigmoid(z));
+end
+
+%%% --- Cost Function: Regularized Cost and Gradient Computation
+
+function [J, grad] = costFunction(nn_params, input_layer_size, hidden_layer_size, num_labels, X, y, lambda)
+    % Theta vector: nn_params
+    % Parameters are introduced unrolled, so we need to reshape the vector
+    % using input_layer_size, hidden_layer_size, num_labels
+    
+    % 25 x 401: hidden_layer_size x (input_layer_size + 1)
+    Theta1 = reshape(nn_params(1:hidden_layer_size * (input_layer_size + 1)), hidden_layer_size, (input_layer_size + 1));
+    % 10 x 26: num_labels x (hidden_layer_size + 1)
+    Theta2 = reshape(nn_params((1 + (hidden_layer_size * (input_layer_size + 1))):end), num_labels, (hidden_layer_size + 1));
+                 
+    % Number of examples
+    m = size(X,1);
+    
+    % Initialize return variables
+    J = 0;
+    Theta1_grad = zeros(size(Theta1));
+    Theta2_grad = zeros(size(Theta2));
+    grad = [Theta1_grad(:) ; Theta2_grad(:)];
+    
+    %%% Feedforward
+    % h: 5000 x 10
+    h = zeros(size(X, 1), 1);
+    % Layer 1
+    a1 = [ones(size(X,1),1), X]; % 5000 x 401
+    % Layer 1 -> Layer 2
+    z2 = a1*Theta1'; % (5000 x 401) x (401 x 25) -> (5000 x 25)
+    a2 = sigmoid(z2);
+    a2 = [ones(size(a2,1),1), a2]; % bias -> (5000 x 26)
+    % Layer 2 -> Layer 3
+    z3 = a2*Theta2'; % (5000 x 26) x (26 x 10) -> (5000 x 10)
+    h = sigmoid(z3);
+    
+    %%% Part 1: Cost
+    
+    % Re-arrange y: one-hot encoding
+    yh = zeros(size(y, 1), num_labels); % 5000 x 10
+    for k = 1:num_labels
+        yh(:,k) = y == k;
+    end
+    
+    % Error: for each class, then sum
+    e = zeros(1, num_labels);
+    for k = 1:num_labels
+        e(k) = -yh(:,k)'*log(h(:,k)) - (1 .- yh(:,k))'*log(1 .- h(:,k));
+    end
+    E = sum(e);
+    J = (1.0/m)*E;
+    
+    %%% Part 2: Regularization of the Cost Function
+    t1 = Theta1(:,2:end)(:); % remove bias weight and unroll to column vector
+    t2 = Theta2(:,2:end)(:); % remove bias weight and unroll to column vector
+    R = (0.5*lambda/m) * (t1'*t1 + t2'*t2);
+    J = J + R;
+    
+    %%% Part 3: Backpropagation & Gradient Computation
+    % We need to perform backpropagation in a for loop iterating examples
+    % Note that I use transposed vectors:
+    % in the script, column vectors are used,
+    % but I take example rows from the X matrix,
+    % and operate with them without converting them in column vectors
+    D1 = zeros(size(Theta1));
+    D2 = zeros(size(Theta2));
+    for i = 1:m
+        % Feedfoward
+        a1 = [1, X(i,:)]; % 1 x 401
+        z2 = a1*Theta1'; % (1 x 401) x (401 x 25) -> (1 x 25)
+        a2 = sigmoid(z2);
+        a2 = [ones(size(a2,1),1), a2]; % bias -> (1 x 26)
+        z3 = a2*Theta2'; % (1 x 26) x (26 x 10) -> (1 x 10)
+        h = sigmoid(z3); % 1 x 10
+        % Error backpropagation
+        d3 = h - yh(i,:); % 1 x 10
+        d2 = Theta2' * d3' .* [1, sigmoidGrad(z2)]'; % (26 x 10) x (10 x 1) .x (26, 1)-> 
+        % d1: there is no such thing, because we have the inputs in layer 1
+        d2 = d2(2:end)'; % remove the bias component, transpose: 1 x 25
+        % Gradient computation: Accumulate gradients
+        D1 = D1 + d2'*a1; % (25 x 1) x (1 x 401) -> (25 x 401)
+        D2 = D2 + d3'*a2; % (10 x 1) x (1 x 26) -> (10 x 26) 
+    end
+    % Normalize
+    Theta1_grad = (1 / m) * D1;
+    Theta2_grad = (1 / m) * D2;
+    
+    %%% Part 4: Regularization Component of the Gradient
+    R1 = Theta1; % (25 x 401)
+    R2 = Theta2; % (10 x 26)
+    R1(:,1) = zeros(size(Theta1, 1),1); % remove bias component: first column
+    R2(:,1) = zeros(size(Theta2, 1),1); % remove bias component: first column
+    Theta1_grad = Theta1_grad + (lambda / m)*R1;
+    Theta2_grad = Theta2_grad + (lambda / m)*R2;
+
+    % Unroll gradients
+    grad = [Theta1_grad(:) ; Theta2_grad(:)];
+
+end
+
+%%% --- Test
+
+% Load saved matrices from file
+% The matrices X and y will now be in your Octave environment
+load('ex4data1.mat');
+
+% Load saved matrices from file
+load('ex4weights.mat');
+% The matrices Theta1 and Theta2 will now be in your workspace
+% Theta1 has size 25 x 401
+% Theta2 has size 10 x 26
+
+nn_params = [Theta1(:) ; Theta2(:)];
+input_layer_size  = 400;  % 20x20 Input Images of Digits
+hidden_layer_size = 25;   % 25 hidden units
+num_labels = 10;          % 10 labels, from 1 to 10 
+lambda = 3;
+[J, grad] = costFunction(nn_params, input_layer_size, hidden_layer_size, num_labels, X, y, lambda);
+disp(J);
+
+%%% --- Train
+
+% Try different number of iterations = epochs
+options = optimset('MaxIter', 50);
+
+% Try different values of lambda
+lambda = 1;
+
+% Architecture parameters
+input_layer_size  = 400;  % 20x20 Input Images of Digits
+hidden_layer_size = 25;   % 25 hidden units
+num_labels = 10;          % 10 labels, from 1 to 10 
+
+% Create "short hand" for the cost function to be minimized with one parameter: the weights
+costFunction = @(p) nnCostFunction(p, input_layer_size, hidden_layer_size, ...
+                                   num_labels, X, y, lambda);
+
+% Initial weights
+initial_Theta1 = randInitializeWeights(input_layer_size, hidden_layer_size);
+initial_Theta2 = randInitializeWeights(hidden_layer_size, num_labels);
+initial_nn_params = [initial_Theta1(:) ; initial_Theta2(:)];
+
+% Optimization
+[nn_params, cost] = fmincg(costFunction, initial_nn_params, options);
+
+% Obtain Theta1 and Theta2 back from nn_params
+Theta1 = reshape(nn_params(1:hidden_layer_size * (input_layer_size + 1)), ...
+                 hidden_layer_size, (input_layer_size + 1));
+
+Theta2 = reshape(nn_params((1 + (hidden_layer_size * (input_layer_size + 1))):end), ...
+                 num_labels, (hidden_layer_size + 1));
+
+%%% --- Evaluate
+
+function p = predict(Theta1, Theta2, X)
+    m = size(X, 1);
+    num_labels = size(Theta2, 1);
+    p = zeros(size(X, 1), 1);
+    h1 = sigmoid([ones(m, 1) X] * Theta1');
+    h2 = sigmoid([ones(m, 1) h1] * Theta2');
+    [dummy, p] = max(h2, [], 2);
+end
+
+pred = predict(Theta1, Theta2, X);
+
+% Accuracy
+disp(mean(double(pred == y)))
+
+```
