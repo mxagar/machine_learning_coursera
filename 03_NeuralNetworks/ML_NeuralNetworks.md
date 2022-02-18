@@ -65,7 +65,7 @@ Neurons in the brain
 
 The computer representation of a neuron is a logistic unit:
 - Inputs: `x_1, x_2, x_3` and bias `x_0 = 1`
-- Output: `h(theta*X) = g(theta*X) = sigmoid(theta*X) = 1 / (1 + exp(-theta*X))`
+- Output: `h(X) = g(theta*X) = sigmoid(theta*X) = 1 / (1 + exp(-theta*X))`
 
 $x = [x_0 = 1, x_1, x_2, x_3]^T$
 $\theta = [\theta_0, \theta_1, \theta_2, \theta_3]^T$
@@ -110,7 +110,7 @@ Notation:
  Therefore:
 
    - Each layer jump is a matrix of weights: **new x (old + 1)**.
-   - Wach input is the sigmoid of a dot product between a **weight matrix row and previous layer outputs / activations**.
+   - Activations are the sigmoid of a dot product between a **weight matrix row and previous layer outputs / activations**.
 
 ![Neural network model](./pics/neural_network_model.png)
 
@@ -168,7 +168,7 @@ The target values or labels represented with the one-hot-encoding notation: $y$ 
 
 ## 3. Exercise 3
 
-Hand-written digits recognition with (part 1) multi-class logistic regression and (part 2) neural networks.
+Hand-written digits recognition with (part 1) multi-class logistic regression and (part 2) neural networks. The digits are a subset of the [MNIST dataset](http://yann.lecun.com/exdb/mnist/) by Yann LeCun. This exercise focuses on the logictic regression model for multi-class classification and on the feedforward pass of the neural network for the same dataset.
 
 I completed the official exercises in Octave:
 
@@ -443,6 +443,9 @@ The cost function $J(\theta)$ of a neural network for classification is equivale
   - $j$ unit id from layer $l + 1$ (where it goes): $1 ... s_{l+1}$
   - $i$ unit id from layer $l$ (where it is coming from): $1 ... s_{l}$; do not mix it with the training example $i$!
 - The regularization term takes into account all parameters $\theta_{ji}^{(l)}$, except the biases! Thus $i$ will start in the regularization term with 1.
+- The cost function of neural networks is very similar to the one of the logistics regression, with the following notable differences:
+  - The prediction error term is the cross-entropy formula, but errors are summed across all `K` classes in addition to across all examples `m`; in other words, the difference of each class `k = 1 ... K` is evaluated with `h_k` and `y_k` and summed for each example `i = 1 ... m`.
+  - The regularization term sums the squares of all parameters or weights; for that, we need to go through each layer `l = 1 ... L-1`, and in each layer (jump) we take the `theta` values that map from the units on one side to the other side; in other words, the sweep the 2 dimensions of the `Theta_l` matrix of a layer. However, the bias weights are not considered.
 
 ![Classification Neural Network: Cost Function](./pics/neural_network_classification_cost.png)
 
@@ -450,14 +453,14 @@ The cost function $J(\theta)$ of a neural network for classification is equivale
 
 The backpropagation algorithm is used to minimize the cost function.
 The idea is that we compute the gradient of the cost function propagating and differentiating the error in a backward pass.
-We do that for all samples and accumulate the total gradient in an epoch.
+We do that for all samples/examples and accumulate the total gradient in an epoch.
 
 So, the steps are roughly:
 
 1. Pick one example `(x,y)`
 2. Feedforward the example to obtain `h`
 3. Compute the error in the output layer: `delta^(L) = y - h`
-4. Feed backward that error to obtain the error of each layer: the error of each layer is a vector of the same size as the number of units/neurons in the layer.
+4. Feed backward that error to obtain the error of each layer: the error of each layer is a vector of the same size as the number of units/neurons in the layer. However, note, that its not a linear map as in the feed forward: $\delta^{(l)} = ((\Theta^{(l)})^T\delta^{(l+1)}).*a^{(l)}.*(1-a^{(l)})$.
 5. Compute the differentiated matrix of the error vector to obtain the error gradient, which can be shown to be `error * activation`; this is a matrix of the same size as the weight or parameter matrix.
 6. Take the next example from the dataset and repeat from step 1; accumulate the error gradient in each layer by summing them example after example. When all examples have been passed, the sum over all examples of all error gradient matrices in each layer yields the final gradient.
 
@@ -472,11 +475,11 @@ Given an example `(x,y)`, we pass it through the network to get the final activa
 **Error computation**:
 
 The error of the inference is $\delta = h - y$. Note that $\delta$ is a vector and each component is related to one of the last neurons.
-That error can be passed backward through the network computing the error components of unit in each layer.
+That error can be passed backward through the network computing the error components of the units in each layer.
 
 That is accomplished with the following formula:
 
-$\delta^{(l)} = ((\Theta^{(l)})\delta^{(l+1)}).*a^{(l)}.*(1-a^{(l)})$
+$\delta^{(l)} = ((\Theta^{(l)})^T\delta^{(l+1)}).*a^{(l)}.*(1-a^{(l)})$
 
 With
 - $.*$ is the element-wise multiplication operator
@@ -515,7 +518,7 @@ Note: in the figure that follows, the superindex $(i)$ refers to the example, wh
 
 If we develop the formula for the computation of $\delta$
 
-$\delta^{(l)} = ((\Theta^{(l)})\delta^{(l+1)}).*a^{(l)}.*(1-a^{(l)})$
+$\delta^{(l)} = ((\Theta^{(l)})^T\delta^{(l+1)}).*a^{(l)}.*(1-a^{(l)})$
 
 we can see that we are actually feeding the inference error $\delta^{(L)}$ backwards in the network to obtain the error of each layer!
 
@@ -527,10 +530,10 @@ $\textrm{cost}(i) = y^{(i)}\log(h(x^{(i)})) + (1 - y^{(i)})\log(1 - h(x^{(i)}))$
 
 The most important messages are two:
 
-1. The backpropagation of the error, e.g.: $\delta_{2}^{(2)} = \theta_{12}^{(2)}\delta_{1}^{(3)} + \theta_{22}^{(2)}\delta_{2}^{(3)}$
+1. The backpropagation of the error, e.g.: $\delta_{2}^{(2)} = \theta_{12}^{(2)}\delta_{1}^{(3)} + \theta_{22}^{(2)}\delta_{2}^{(3)}$. **I am not sure where this expression comes from - doe we get that after applying the general formula above?**
 2. The $\delta$ component is the derivative of the cost with respect to the respective $z$ mapping.
 
-Note also that the error components of the bias units can be computed (and probably are computed as a byproduct of a vectorial formulation): $\delta_0^{(l)}$; however, these values are not used later on, since the bias value remains always 1. I understand, though, that the weights associated to those biases are updated: $\theta_{i0}^{(l)}$
+Note also that the error components of the bias units can be computed (and probably are computed as a byproduct of a vectorial formulation): $\delta_0^{(l)}$; however, these values are not used later on, since the bias value remains always 1. I understand, though, that the weights associated to those biases are updated: $\theta_{i0}^{(l)}$?
 
 ![Backpropagation: Intuition](./pics/nn_backpropagation_intuition.png)
 
@@ -585,7 +588,7 @@ The advantage of the matrix representation is that we can very easily perform op
 
 It is easy to introduce such confusing bugs to backpropagation, that the cost function seems to be decreasing during optimization, even though it is in reality increasing. To avoid such situations, **numerical gradient checking** is very useful.
 
-The gradient can be aproximated by computing the difference of the cost in a close neighborhood or radius `epsilon`:
+The gradient can be aproximated by computing the difference of the cost in a close neighborhood of radius `epsilon`:
 
 ```
 gradApprox = (J(theta + epsilon) - J(theta - epsilon))/(2*epsilon)

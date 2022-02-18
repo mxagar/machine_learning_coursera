@@ -64,21 +64,42 @@ Theta2_grad = zeros(size(Theta2));
 
 
 
+%%% Feedforward
+% h: 5000 x 10
 
+% Initialize return variable: predictions
+h = zeros(size(X, 1), 1);
+% Layer 1
+a1 = [ones(size(X,1),1), X]; % 5000 x 401
+% Layer 1 -> Layer 2
+z2 = a1*Theta1'; % (5000 x 401) x (401 x 25) -> (5000 x 25)
+a2 = sigmoid(z2);
+a2 = [ones(size(a2,1),1), a2]; % bias -> (5000 x 26)
+% Layer 2 -> Layer 3
+z3 = a2*Theta2'; % (5000 x 26) x (26 x 10) -> (5000 x 10)
+h = sigmoid(z3);
 
+%%% Part 1: Cost
 
+% Re-arrange y: one-hot encoding
+yh = zeros(size(y, 1), num_labels); % 5000 x 10
+for k = 1:num_labels
+    yh(:,k) = y == k;
+end
 
+% Error: for each class, then sum
+e = zeros(1, num_labels);
+for k = 1:num_labels
+    e(k) = -yh(:,k)'*log(h(:,k)) - (1 .- yh(:,k))'*log(1 .- h(:,k));
+end
+E = sum(e);
+J = (1.0/m)*E;
 
-
-
-
-
-
-
-
-
-
-
+%%% Part 2: Regularization of the Cost Function
+t1 = Theta1(:,2:end)(:); % remove bias weight and unroll to column vector
+t2 = Theta2(:,2:end)(:); % remove bias weight and unroll to column vector
+R = (0.5*lambda/m) * (t1'*t1 + t2'*t2);
+J = J + R;
 
 % -------------------------------------------------------------
 
