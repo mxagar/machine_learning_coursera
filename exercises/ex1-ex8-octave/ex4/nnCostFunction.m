@@ -101,6 +101,43 @@ t2 = Theta2(:,2:end)(:); % remove bias weight and unroll to column vector
 R = (0.5*lambda/m) * (t1'*t1 + t2'*t2);
 J = J + R;
 
+%%% Part 3: Backpropagation & Gradient Computation
+% We need to perform backpropagation in a for loop iterating examples
+% Note that I use transposed vectors:
+% in the script, column vectors are used,
+% but I take example rows from the X matrix,
+% and operate with them without converting them in column vectors
+D1 = zeros(size(Theta1));
+D2 = zeros(size(Theta2));
+for i = 1:m
+    % Feedfoward
+    a1 = [1, X(i,:)]; % 1 x 401
+    z2 = a1*Theta1'; % (1 x 401) x (401 x 25) -> (1 x 25)
+    a2 = sigmoid(z2);
+    a2 = [ones(size(a2,1),1), a2]; % bias -> (1 x 26)
+    z3 = a2*Theta2'; % (1 x 26) x (26 x 10) -> (1 x 10)
+    h = sigmoid(z3); % 1 x 10
+    % Error backpropagation
+    d3 = h - yh(i,:); % 1 x 10
+    d2 = Theta2' * d3' .* [1, sigmoidGradient(z2)]'; % (26 x 10) x (10 x 1) .x (26, 1)-> 
+    % d1: there is no such thing, because we have the inputs in layer 1
+    d2 = d2(2:end)'; % remove the bias component, transpose: 1 x 25
+    % Gradient computation: Accumulate gradients
+    D1 = D1 + d2'*a1; % (25 x 1) x (1 x 401) -> (25 x 401)
+    D2 = D2 + d3'*a2; % (10 x 1) x (1 x 26) -> (10 x 26) 
+end
+% Normalize
+Theta1_grad = (1 / m) * D1;
+Theta2_grad = (1 / m) * D2;
+
+%%% Part 4: Regularization Component of the Gradient
+R1 = Theta1; % (25 x 401)
+R2 = Theta2; % (10 x 26)
+R1(:,1) = zeros(size(Theta1, 1),1); % remove bias component: first column
+R2(:,1) = zeros(size(Theta2, 1),1); % remove bias component: first column
+Theta1_grad = Theta1_grad + (lambda / m)*R1;
+Theta2_grad = Theta2_grad + (lambda / m)*R2;
+
 % -------------------------------------------------------------
 
 % =========================================================================
