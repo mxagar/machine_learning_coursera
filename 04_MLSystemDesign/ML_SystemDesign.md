@@ -49,7 +49,7 @@ The training & testing procedure happens in parallel as follows:
 
 Note that the formulas are basically the same, only the examples are different. However:
 
-- Regularization is used on the train split, not on the test split.
+- Regularization is used on the train split for training, not on the test split for evaluating; in general, note that the regularization term makes sense only for the computation of the gradient, not for the evaluation of the cost/error.
 - For classification cases, instead of `J_test`, the **accuracy** can be computed: `Accuracy = percentage of correct predictions`.
 
 If we have overfitting, when `J` decreases, `J_test` will increase and `Accuracy` will decrease, because we fail to generalize!
@@ -133,4 +133,28 @@ The procedure for the optimal `lambda` selection is the same:
 - Compute `J_train` and `J_cv` for each `lambda`. Pick the `lambda` with smallest `J_cv`. We have fitted `lambda` to the cross-validation test
 - Compute `J_test` for the final selected model. That is our test error.
 - Optionally, we can plot `J_train`, `J_cv` as function of `lambda`.
+
+### 2.3 Learning Curves
+
+We should always plot learning curves: `J_train` and `J_cv` as function of `m` or training examples. Basically, we train/fit our model for different numbers of examples and compute the `J_train` and `J_cv`. That is in practice very similar mini-batch gradient descent, as I understand; in that case, we'd plot the `J_train` and `J_cv` as function of the number of trained batches.
+
+In general:
+
+- For low numbers of `m`:
+  - `J_train` will be low, because the model perfectly fits the few examples
+  - `J_cv`will be large, because we completely lack of generalization
+- For large values of `m`, `J` should decrease with larger values of `m`.
+  - `J_train` will be larger, because the model tries to fit more (diverse) examples; generalization has a cost
+  - `J_cv` will be smaller, because we are starting to have a more generalizable model
+
+However, the diagrams differ in each of these cases:
+
+- When underfitting (high bias), `J_train` & `J_cv` converge very fast in a high value; the desired error would be below their convergence asymptote. **It does not matter if we add more examples, the model is too simplistic!** Note that both curves should converge, but not very fast; very fast converging is a sign of underfitting.
+- When overfitting (high variance), `J_train` & `J_cv` converge very slowly, it seems as if there is a large gap between them. **If we add more examples, errors will decrease, but we cannot generalize properly.**
+
+![Learning curves: high bias](./pics/learning_curves_high_bias.png)
+
+![Learning curves: high variance](./pics/learning_curves_high_variance.png)
+
+### 2.4 What Should We Do?
 
