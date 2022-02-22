@@ -103,7 +103,7 @@ Let's consider the same example as before: we are trying to choose the best degr
 
 Where is the sweet spot? We just plot both as we increase `d`
 
-![Bias & Variance: Selection of model (hyper) parameters](./pics/bias_variance_selection.png)
+![Bias & Variance: Selection of model (hyper) parameters](./pics/bias_variance_selection_degree.png)
 
 In other words, by computing `J` and `J_cv` for different model (hyper) parameters, we know whether:
 
@@ -133,6 +133,8 @@ The procedure for the optimal `lambda` selection is the same:
 - Compute `J_train` and `J_cv` for each `lambda`. Pick the `lambda` with smallest `J_cv`. We have fitted `lambda` to the cross-validation test
 - Compute `J_test` for the final selected model. That is our test error.
 - Optionally, we can plot `J_train`, `J_cv` as function of `lambda`.
+
+![Bias & Variance: Selection of model (hyper) parameters](./pics/bias_variance_selection_lambda.png)
 
 ### 2.3 Learning Curves
 
@@ -176,6 +178,16 @@ Note that before doing anything, we need to know in which situation we are: high
 
 #### 2.4.1 Particular Case: Neural Networks
 
+We can decide the architecture, i.e., the connectivity pattern, of a neural network. That architecture can have an impact on the bias/variance of our model:
 
+- Small networks tend to be more simplistic: higher bias = underfitting; they are cheaper to compute.
+- Larger networks tend to be more complex: higher variance = overfitting; they are more expensive to compute.
+
+With larger networks, we should always apply regularization to prevent overfitting. Another question is related to the layers:
+
+- Few layers with many hidden units/neurons? Note that using a single hidden layer has been often the default.
+- Or more hidden layers with less units/neurons?
+
+One possible approach to answer that question is to define hyperparameters: (1) number of units, (2) number of hidden layers. Then, we compute `J_train`, `J_cv`, `J_test` as with the other hyperparameters varied (`degree`, `lambda`) and select the design option with the smallest `J_cv`.
 
 ![Neural Networks: Overfitting](./pics/neural_networks_overfitting.png)
