@@ -156,5 +156,26 @@ However, the diagrams differ in each of these cases:
 
 ![Learning curves: high variance](./pics/learning_curves_high_variance.png)
 
-### 2.4 What Should We Do?
+### 2.4 What Should We Do to Improve Our Model?
 
+Again, list of possible actions to consider in order to improve our model:
+
+- Get more training examples: fixes high variance (= overfitting); however, if we have high bias (= underfitting), it won't help at all.
+- Try smaller sets of features: fixes high variance (= overfitting)
+- Try getting additional features: fixes high bias (= underfitting)
+- Try adding polynomial features: fixes high bias (= underfitting)
+- Try decreasing `lambda`: fixes high bias (= underfitting)
+- Try increasing `lambda`: fixes high variance (= overfitting)
+
+Note that before doing anything, we need to know in which situation we are: high bias/variance; that is discovered following the methods explained in sections 1 & 2:
+
+- Dataset splits: train / cross-validation / test
+- Compute `J` for each split, specially `J_train` and `J_cv`
+  - With varying hyperparameters: `degree`, `lambda`
+  - With varying number of examples used for training
+
+#### 2.4.1 Particular Case: Neural Networks
+
+
+
+![Neural Networks: Overfitting](./pics/neural_networks_overfitting.png)
