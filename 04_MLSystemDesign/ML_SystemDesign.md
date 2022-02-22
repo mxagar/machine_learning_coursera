@@ -15,7 +15,13 @@ Overview of contents:
 1. Evaluating a Learning Algorithm: Train / Test / Cross-Validation Splits
    - 1.1 Evaluating a Hypothesis: Train/Test Splits
    - 1.2 Model Selection: Train/Validation/Test Splits
-2. Bias vs. Variance
+2. Bias vs. Variance = Underfitting vs. Overfitting
+   - 2.1 Diagnosing Bias vs. Variance = Underfitting vs. Overfitting
+   - 2.2 Regularization and Bias/Variance
+   - 2.3 Learning Curves
+   - 2.4 What Should We Do to Improve Our Model?
+     - 2.4.1 Particular Case: Neural Networks
+3. Exercise 5 (Week 6)
 
 ## 1. Evaluating a Learning Algorithm: Train / Test / Cross-Validation Splits
 
@@ -191,3 +197,6 @@ With larger networks, we should always apply regularization to prevent overfitti
 One possible approach to answer that question is to define hyperparameters: (1) number of units, (2) number of hidden layers. Then, we compute `J_train`, `J_cv`, `J_test` as with the other hyperparameters varied (`degree`, `lambda`) and select the design option with the smallest `J_cv`.
 
 ![Neural Networks: Overfitting](./pics/neural_networks_overfitting.png)
+
+## 3. Exercise 5 (Week 6)
+
