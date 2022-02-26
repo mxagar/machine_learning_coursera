@@ -39,11 +39,11 @@ List of possible actions to consider in order to improve our model:
 
 ### 1.1 Evaluating a Hypothesis: Train/Test Splits
 
-Overfitting and underfitting are common issues in the model or hypothesis function. In particular, overfitting happens when we learn the noise and even though the loss or error of our cost function is small, we cannot generalize, because the model has learnt nonsensical holes and curves to better with the data.
+Overfitting and underfitting are common issues in the model or hypothesis function. In particular, overfitting happens when we learn the noise and even though the loss or error of our cost function is small, we cannot generalize, because the model has learnt nonsensical holes and curves to better fit the data.
 
 Unfortunately, we have often too many features to plot the model and see whether we have too much holes and curves which are overfitting the data.
 
-To overcome that, we split the dataset in two sets: **training** and **test**; usual proportions are training `70%` & test `30%`, and te examples must be randomly selected (e.g., shuffle the examples and select first 70%). We note:
+To overcome that, we split the dataset in two sets: **training** and **test**; usual proportions are training `70%` & test `30%`, and the examples must be randomly selected (e.g., shuffle the examples and select first 70%). We note:
 
 - `m` is decreased to the `70%` of its original value.
 - `m_test`: new number for all samples taken for testing.
@@ -100,7 +100,7 @@ So don't get confused; use them as synonims! high bias = underfitting, high vari
 
 Let's consider the same example as before: we are trying to choose the best degree of the linear regression polynomial: `d`. We have these two extremes:
 
-- For low values of `d` we expect underfitting, i.e., high bias. This is linked
+- For low values of `d` we expect underfitting, i.e., high bias. This is linked to
   - high `J`
   - and high `J_cv` or `J_test`.
 - For high values of `d` we expect overfitting, i.e., high variance. This is linked to
@@ -136,7 +136,7 @@ This example is equivalent to the model selection relative to the degree `d`. Ho
 The procedure for the optimal `lambda` selection is the same:
 
 - Optimize the model with different values of `lambda` using `J`; we obtain `theta` for each `lambda`. Suggested `lambda = 0.01, 0.01*2, 0.01*2^2, 0.01*2^3`: 12 values approximately.
-- Compute `J_train` and `J_cv` for each `lambda`. Pick the `lambda` with smallest `J_cv`. We have fitted `lambda` to the cross-validation test
+- Compute `J_train` and `J_cv` for each `lambda`. Pick the `lambda` with smallest `J_cv`. We have fitted `lambda` to the cross-validation split
 - Compute `J_test` for the final selected model. That is our test error.
 - Optionally, we can plot `J_train`, `J_cv` as function of `lambda`.
 
@@ -144,7 +144,7 @@ The procedure for the optimal `lambda` selection is the same:
 
 ### 2.3 Learning Curves
 
-We should always plot learning curves: `J_train` and `J_cv` as function of `m` or training examples. Basically, we train/fit our model for different numbers of examples and compute the `J_train` and `J_cv`. That is in practice very similar mini-batch gradient descent, as I understand; in that case, we'd plot the `J_train` and `J_cv` as function of the number of trained batches.
+We should always plot learning curves: `J_train` and `J_cv` as function of `m` or training examples. Basically, we train/fit our model for different numbers of examples and compute the `J_train` and `J_cv`. That is in practice very similar mini-batch gradient descent, as I understand; in that case, we'd plot the `J_train` and `J_cv` as function of the number of trained batches. However, I think here Ng refers to the fact that we perform the whole training (several epochs) with different amounts of examples `m` each time. In that case, it makes sense to have increasing `J_train` values.
 
 In general:
 
