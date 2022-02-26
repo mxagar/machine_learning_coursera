@@ -20,15 +20,20 @@ grad = zeros(size(theta));
 %
 
 
+% Cost (without regularization)
+h = X*theta; % (m x (n+1)) x ((n+1) x 1) -> m x 1
+e = (h - y); % m x 1
+J = (0.5/m) * (e'*e);
+% Regularization term
+t = theta(2:end,:); % n x 1
+J = J + ((0.5*lambda/m) * (t'*t));
 
-
-
-
-
-
-
-
-
+% Gradient (without regularization)
+grad = (1/m) * (e'*X); % (1 x m) x (m x (n+1)) -> 1 x (n+1)
+% Regularization term
+r = (lambda/m) * theta(2:end,1); % n x 1
+grad = grad' + [0; r];
+    
 
 % =========================================================================
 
