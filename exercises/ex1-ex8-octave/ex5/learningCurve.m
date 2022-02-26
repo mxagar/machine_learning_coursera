@@ -55,7 +55,17 @@ error_val   = zeros(m, 1);
 
 
 
-
+for k = 1:m
+    % Fit theta with k examples WITH regularization
+    [theta] = trainLinearReg([ones(k, 1) X(1:k,:)], y(1:k), lambda);
+    % Compute J_train, without regularization, because we want the real error
+    [J_train, grad] = linearRegCostFunction([ones(k, 1) X(1:k,:)], y(1:k), theta, 0);
+    % Compute J_cv with entire CV split, because we want the real error
+    [J_cv, grad] = linearRegCostFunction([ones(size(Xval,1), 1) Xval], yval, theta, 0);
+    % Store the errors/costs
+    error_train(k) = J_train;
+    error_val(k) = J_cv;
+end
 
 
 
