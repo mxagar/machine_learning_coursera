@@ -21,7 +21,7 @@ Overview of contents:
    - 2.3 Learning Curves
    - 2.4 What Should We Do to Improve Our Model?
      - 2.4.1 Particular Case: Neural Networks
-3. Exercise 5 (Week 6)
+3. Exercise 5 (Week 6): Octave Code Summary
 
 ## 1. Evaluating a Learning Algorithm: Train / Test / Cross-Validation Splits
 
@@ -198,5 +198,228 @@ One possible approach to answer that question is to define hyperparameters: (1) 
 
 ![Neural Networks: Overfitting](./pics/neural_networks_overfitting.png)
 
-## 3. Exercise 5 (Week 6)
+## 3. Exercise 5 (Week 6): Octave Code Summary
+
+In this exercise, regularized linear regression is implemented to study models with different bias-variance properties.
+
+Files provided by Coursera, located under `../exercises/ex1-ex8-octave/ex5`
+
+- `ex5.m` - Octave/MATLAB script that steps you through the exercise
+- `ex5data1.mat` - Dataset
+- `submit.m` - Submission script that sends your solutions to our servers
+- `featureNormalize.m` - Feature normalization function
+- `fmincg.m` - Function minimization routine (similar to `fminunc`)
+- `plotFit.m` - Plot a polynomial fit
+- `trainLinearReg.m` - Trains linear regression using your cost function
+
+Files to complete:
+
+- `linearRegCostFunction.m` - Regularized linear regression cost function
+- `learningCurve.m` - Generates a learning curve
+- `polyFeatures.m` - Maps data into polynomial feature space
+- `validationCurve.m` - Generates a cross validation curve
+
+Workflow:
+
+- Download latest Octave version of exercise from Coursera
+- Complete code in exercise files following `ex5.pdf`
+- Whenever an exercise part is finished
+  - Check it with `ex5` in Octave terminal
+  - Create a submission token on Coursera (exercise submission page, it lasts 30 minutes)
+  - Execute `submit` in Octave terminal
+  - Introduce email and token
+  - Results appear
+
+**Overview of contents:**
+
+0. Setup: `gnuplot`
+1. Dataset Loading & Visualization
+2. Regularized Linear Regression
+    - 2.1 Regularized Linear Regression: Cost Function & Gradient -- `linearRegCostFunction.m`
+    - 2.2 Train and Plot Fitted Line -- `trainLinearReg.m`
+3. Bias-Variace
+    - 3.1 Learning Curves -- `learningCurve.m`
+4. Polynomial Regression
+    - 4.1 Polynomial Model -- `polyFeatures.m`
+    - 4.2 Learning Polynomial Regression
+    - 4.3 Selecting lambda Usig a Cross-Validation Set -- `validationCurve.m`
+
+```octave
+
+%% -- Regularized Linear Regression: Cost Function & Gradient -- linearRegCostFunction.m
+
+function [J, grad] = linearRegCostFunction_(X, y, theta, lambda)
+    % Number of training examples
+    m = length(y); 
+    % Init return variables
+    J = 0;
+    grad = zeros(size(theta));
+    
+    % Cost (without regularization)
+    h = X*theta; % (m x (n+1)) x ((n+1) x 1) -> m x 1
+    e = (h - y); % m x 1
+    J = (0.5/m) * (e'*e);
+    % Regularization term
+    t = theta(2:end,:); % n x 1
+    J = J + ((0.5*lambda/m) * (t'*t));
+    
+    % Gradient (without regularization)
+    grad = (1/m) * (e'*X); % (1 x m) x (m x (n+1)) -> 1 x (n+1)
+    % Regularization term
+    r = (lambda/m) * theta(2:end,1); % n x 1
+    grad = grad' + [0; r];
+    
+    % Column vector
+    grad = grad(:);
+end
+
+theta = ones(size(X,2)+1,1); % (n+1) x 1
+Xp = [ones(size(X,1),1), X]; % m x (n+1)
+lambda = 1;
+[J, grad] = linearRegCostFunction_(Xp, y, theta, lambda);
+
+%% -- Train and Plot Fitted Line -- trainLinearReg.m
+
+function [theta] = trainLinearReg_(X, y, lambda)
+    initial_theta = zeros(size(X, 2), 1); 
+    % Create "short hand" for the cost function to be minimized
+    costFunction = @(t) linearRegCostFunction(X, y, t, lambda);
+    % Now, costFunction is a function that takes in only one argument
+    options = optimset('MaxIter', 200, 'GradObj', 'on');
+    % Minimize using fmincg
+    theta = fmincg(costFunction, initial_theta, options);
+end
+
+lambda = 0;
+[theta] = trainLinearReg_([ones(m, 1) X], y, lambda);
+
+plot(X, y, 'rx', 'MarkerSize', 10, 'LineWidth', 1.5);
+xlabel('Change in water level (x)');
+ylabel('Water flowing out of the dam (y)');
+hold on;
+x = linspace(min(X(:)),max(X(:)),50)';
+plot(x, [ones(size(x,1), 1) x]*theta, '--', 'LineWidth', 2)
+hold off;
+
+%% -- Bias & Variance: Learning Curves -- learningCurve.m
+
+function [error_train, error_val] = learningCurve_(X, y, Xval, yval, lambda)
+    % Number of training examples
+    % Also number of errors computed
+    % X(1), X(1:2), X(1:3), ..., X(1:m): m errors with increasing number of examples used
+    m = size(X, 1);
+
+    % Init retun variables
+    % error_train(i) must be computed using the theta obtained after training with i examples
+    % error_val(i) must be obtained using the same theta by evaluating THE COMPLETE CV SPLIT!
+    error_train = zeros(m, 1); % J_train
+    error_val   = zeros(m, 1); % J_cv
+
+    for k = 1:m
+        % Fit theta with k examples WITH regularization
+        [theta] = trainLinearReg([ones(k, 1) X(1:k,:)], y(1:k), lambda);
+        % Compute J_train, without regularization, because we want the real error
+        [J_train, grad] = linearRegCostFunction([ones(k, 1) X(1:k,:)], y(1:k), theta, 0);
+        % Compute J_cv with entire CV split, because we want the real error
+        [J_cv, grad] = linearRegCostFunction([ones(size(Xval,1), 1) Xval], yval, theta, 0);
+        % Store the errors/costs
+        error_train(k) = J_train;
+        error_val(k) = J_cv;
+    end
+end
+
+lambda = 0;
+[error_train, error_val] = learningCurve_(X, y, Xval, yval, lambda);
+
+plot(1:m, error_train, 1:m, error_val);
+title('Learning curve for linear regression')
+legend('Train', 'Cross Validation')
+xlabel('Number of training examples')
+ylabel('Error')
+axis([0 13 0 150])
+
+%% -- Polynomial Regression: Model -- polyFeatures.m
+
+function [X_poly] = polyFeatures_(X, p)
+    X_poly = zeros(numel(X), p);
+    for i = 1:p
+        X_poly(:,i) = X.^i;
+    end
+end
+
+function [X_norm] = applyNormalization(X, mu, sigma)
+    X_norm = zeros(size(X));
+    for i = 1:size(X,2)
+        X_norm(:,i) = (X(:,i).-mu(1,i))./sigma(1,i);
+    end
+end
+
+function [X_norm, mu, sigma] = featureNormalize_(X)
+    mu = mean(X);
+    sigma = std(X);
+    %X_norm = bsxfun(@minus, X, mu);
+    %X_norm = bsxfun(@rdivide, X_norm, sigma);
+    X_norm = applyNormalization(X, mu, sigma);
+end
+
+%% -- Learning Polynomial Regression
+
+p = 8;
+X_poly = polyFeatures(X, p);
+[X_poly, mu, sigma] = featureNormalize(X_poly);
+X_poly = [ones(m, 1), X_poly];
+% Map X_poly_test and normalize (using mu and sigma)
+X_poly_test = polyFeatures(Xtest, p);
+X_poly_test = applyNormalization(X_poly_test, mu, sigma);
+X_poly_test = [ones(size(X_poly_test, 1), 1), X_poly_test];
+% Map X_poly_val and normalize (using mu and sigma)
+X_poly_val = polyFeatures(Xval, p);
+X_poly_val = applyNormalization(X_poly_val, mu, sigma);
+X_poly_val = [ones(size(X_poly_val, 1), 1), X_poly_val];
+
+lambda = 1;
+[theta] = trainLinearReg(X_poly, y, lambda);
+
+figure(1);
+plot(X, y, 'rx', 'MarkerSize', 10, 'LineWidth', 1.5);
+plotFit(min(X), max(X), mu, sigma, theta, p);
+xlabel('Change in water level (x)');
+ylabel('Water flowing out of the dam (y)');
+title (sprintf('Polynomial Regression Fit (lambda = %f)', lambda));
+
+%% -- Selecting lambda Usig a Cross-Validation Set -- validationCurve.m
+
+function [lambda_vec, error_train, error_val] = validationCurve_(X, y, Xval, yval)
+
+    % Selected values of lambda (you should not change this)
+    lambda_vec = [0 0.001 0.003 0.01 0.03 0.1 0.3 1 3 10]';
+
+    % Init retun variables
+    % error_val(i) must be obtained using the same theta by evaluating THE COMPLETE CV SPLIT!
+    error_train = zeros(length(lambda_vec), 1); % J_train
+    error_val = zeros(length(lambda_vec), 1); % J_cv
+
+    for k = 1:length(lambda_vec)
+        lambda = lambda_vec(k);
+        % Fit theta with k examples WITH regularization
+        theta = trainLinearReg(X, y, lambda);
+        % Compute J_train, without regularization, because we want the real error
+        [J_train, grad] = linearRegCostFunction(X, y, theta, 0);
+        % Compute J_cv with entire CV split, because we want the real error
+        [J_cv, grad] = linearRegCostFunction(Xval, yval, theta, 0);
+        % Store the errors/costs
+        error_train(k) = J_train;
+        error_val(k) = J_cv;
+    end
+
+end
+
+[lambda_vec, error_train, error_val] = validationCurve_(X_poly, y, X_poly_val, yval);
+
+plot(lambda_vec, error_train, lambda_vec, error_val);
+legend('Train', 'Cross Validation');
+xlabel('lambda');
+ylabel('Error');
+
+```
 
