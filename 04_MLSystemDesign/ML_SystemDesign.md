@@ -423,3 +423,104 @@ ylabel('Error');
 
 ```
 
+## 4. Machine Learning System Design with A Case: Building a Spam Classifier
+
+### 4.1 Prioritizing What to Work On
+
+We want to build an email spam classifier, as follows:
+
+- `X`: features of emails. Choose most frequent `N` words and set an `N`-dimensional vector or `0/1` that encodes whether each word appears in the email or not. `N` is set to 50,000 in practice. We can also select a subset of the `N` words which we consider to be key: our name, buy, deal, discount, etc.
+- `y` is `1` is spam, `0` if not.
+
+Which strategies should we consider to improve the spam classifier?
+
+- **Collects lots of data**; but that do not work always
+- Developed **more sophisticated features**; e.g., use email header routing information: spam emails try to hide origin
+- Look at the text and try to **extract more features**:
+  - Is "discount" the same as "Discount"? Punctuation?
+  - Detect misspellings: spam emails try to hide keywords to pass unperceived: w4atches, m0rtgage, med1cine...
+
+These strategies don't always work! We need to brainstorm similar ideas for each problem and analyze them!
+
+### 4.2 Error Analysis
+
+Recommended approach:
+
+- Start with a simple algorithm that can be implemented in one day.
+- Plot learning curves (`J_train`, `J_cv`): we see if we need more data or more features
+- Error analysis: manually example examples from the cross-validation set that the algorithm is making errors with; identify trends, patterns. For example
+  - Try to understand the type of misclassified emails: pharma, replica, stolen pw, other?
+  - Extract characteristic features (brainstormed strategies):
+    - Deliberate misspellings
+    - Unusual email routing
+    - Unusual punctuation
+
+Note that the cross-validation split is used because we are detecting features that would decrease the error. If we use `J_test`, then we cannot really independently evaluate whether the new features improve our model.
+
+It is fundamental to define an error metric (`J_cv`, `accuracy`) and check how it changes when new features/strategies are implemented:
+
+- In NLP stemming is performed: discount = dicounts = discounted; but it sometimes is not effective; we need to test it! Just compute the metric with and without stemming.
+- Should be us only non-capitalized words? Test it.
+
+In summary:
+
+- We build a quick and dirty version
+- Plot learning curves to decide if we need more examples (fixe high variance) or more features (fix high bias).
+- Manually check errors; the errors help us understand which features we really need to detect.
+- We define metrics and try our new strategies to see if they improve these metrics.
+
+## 5. Handling Skewed Data
+
+Skewed data is characterized by data which has imbalanced classes: there is much more examples of one class compared to others. In consequence, the `Accuracy` metric is not enough, being
+
+`Accuracy = Correct Predictions / All Predictions`.
+
+Example of why that is so: We develop an algorithm that tells with `99% accuracy` (on the test set) if a patient has cancer. However, note that only `0.5%` of the patients have cancer. Then, the following algorithm already has a better accuracy of `100-0.5 = 99.5%`:
+
+```octave
+function h = predict(x)
+  h = 0; % ignore x!
+end
+```
+
+Thus, in cases with skewed data, it is essential to compute some other metrics: **Precision** and **Recall**.
+
+### 5.1 Error Metrics for Skewed Classes: Precision & Recall
+
+In the figure, we see a **confusion matrix**: Actual values vs Predicted values, compiling the numbers of true/false positives/negatives. Note that the matrix is built considering **`y = 1` for the rare case we want to detect**.
+
+![Skewed Data Metric: Precision & Recall](./pics/precision_recall.png)
+
+We define:
+
+- `Precision (Predicted row) = True Positives / Predicted Positive = TP / (TP + FP)`
+- `Recall (Actual row) = True Positives / Actual Positive = TP / (TP + FN)`
+
+In skewed datasets, we need to have high `Precision` and `Recall` scores to have a good model, high `Accuracy` is not enough.
+
+Note that if we have 2 classes, the confusion matrix is `2 x 2`; if `N` classes, `N x N`.
+
+Also, see:
+
+- [Sensitivity](https://en.wikipedia.org/wiki/Sensitivity_and_specificity) = `Recall` = `True Positives / (True Positives + False Negatives)`
+- [Specificity](https://en.wikipedia.org/wiki/Sensitivity_and_specificity) = `True Positives / Actual False Negatives` = `True Positives / (True Negatives + False Positives)`
+- [F1-Score](https://en.wikipedia.org/wiki/F-score) = `2 * (Precision * Recall) / (Precision + Recall)`
+- Type I & Type II errors, `alpha` & `beta`.
+
+### 5.2 Trading Off Precision and Recall
+
+Precision and Recall seem to be at odds, but they can be optimized jointly:
+- `Precision, P`: favours not to be an alarmist -- it accounts for correctly detected true positives (patients that are told that have cancer, who really have cancer).
+- `Recall, R`: favours to be an alarmist, thus, more conservative -- it accounts for the false negatives (patients with cancer that would be told that they have no cancer).
+
+We can have a unifying metric called `F1-Score`, which is the one we should try to optimize:
+
+`F1-Score = 2 * (P*R) / (P+R)` `in [0,1]` (harmonic mean of both, so that cases like `P=1,R=0` have value `0` and not `0.5`, as they would with the arithmetic mean).
+
+We can optimize that score by setting our threshold: `h(x) > threshold -> 1; 0 otherwise`.
+Typically: `threshold = 0.5`, but
+
+- if we increase `threshold`, we become more conservative: higher `R`, lower `P`
+- if we decrease `threshold`, we become less conservative: higher `P`, lower `R`
+
+The strategy is the following: We vary our `threshold` from low (e.g., `0.1`) to high (e.g., `0.9`) and compute the `Precision`, `Recall` and `F1-Score` on the **cross-validation set**; we pick the `threshold` that gives the highest `F1-Score`
