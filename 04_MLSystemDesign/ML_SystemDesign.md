@@ -22,6 +22,13 @@ Overview of contents:
    - 2.4 What Should We Do to Improve Our Model?
      - 2.4.1 Particular Case: Neural Networks
 3. Exercise 5 (Week 6): Octave Code Summary
+4. Machine Learning System Design with A Case: Building a Spam Classifier
+   - 4.1 Prioritizing What to Work On
+   - 4.2 Error Analysis
+5. Handling Skewed Data
+   - 5.1 Error Metrics for Skewed Classes: Precision & Recall
+   - 5.2 Trading Off Precision and Recall
+6. Using Large Datasets
 
 ## 1. Evaluating a Learning Algorithm: Train / Test / Cross-Validation Splits
 
