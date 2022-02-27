@@ -523,4 +523,12 @@ Typically: `threshold = 0.5`, but
 - if we increase `threshold`, we become more conservative: higher `R`, lower `P`
 - if we decrease `threshold`, we become less conservative: higher `P`, lower `R`
 
-The strategy is the following: We vary our `threshold` from low (e.g., `0.1`) to high (e.g., `0.9`) and compute the `Precision`, `Recall` and `F1-Score` on the **cross-validation set**; we pick the `threshold` that gives the highest `F1-Score`
+The strategy is the following: We vary our `threshold` from low (e.g., `0.1`) to high (e.g., `0.9`) and compute the `Precision`, `Recall` and `F1-Score` on the **cross-validation set**; we pick the `threshold` that gives the highest `F1-Score`.
+
+## 6. Using Large Datasets
+
+We make the following assumption: `x` has sufficient information to predict `y`. If a human can do it with `x`, then, intuitively we know the assumption is true.
+
+With that assumption, if we can get a large dataset, then:
+- We define a complex model with many paramaters (low bias); that will decrease `J_train`.
+- We train it with a lot of examples, so the likelihood of overfitting will decrease; thus, we'll end up having small `J_train` and `J_test`.
