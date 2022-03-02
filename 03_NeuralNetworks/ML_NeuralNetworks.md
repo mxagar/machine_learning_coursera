@@ -1,4 +1,4 @@
-# Mechine Learning: Neural Networks
+# Machine Learning: Neural Networks
 
 These are my notes on the Coursera course by Andrew Ng ["Machine Learning"](https://www.coursera.org/learn/machine-learning).
 

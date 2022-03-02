@@ -1,4 +1,4 @@
-# Mechine Learning: Application Advice and System Design
+# Machine Learning: Application Advice and System Design
 
 These are my notes on the Coursera course by Andrew Ng ["Machine Learning"](https://www.coursera.org/learn/machine-learning).
 
