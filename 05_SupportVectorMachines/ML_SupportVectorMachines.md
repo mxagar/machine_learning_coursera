@@ -87,9 +87,9 @@ In the following, it is shown how that can be achieved.
 
 Note that the `cost(z = theta*x) = 0` if `theta*x` is beyond a threshold:
 
-$\textrm{cost}_1(\theta^{T}x) = \max (0, \theta^{T}x -1)$, $m_1 = 1$ (unimportant the value, since we'll use only the case it yields 0)
+$\textrm{cost}_1(\theta^{T}x) = \max (0, \theta^{T}x -1)$, $m_1 = 1$ (the value of $m$ is not important, since we'll refer only to the conceptual case when `cost = 0`)
 
-$\textrm{cost}_0(\theta^{T}x) = \max (0, \theta^{T}x + 1)$, $m_0 = 1$ (unimportant the value, since we'll use only the case it yields 0)
+$\textrm{cost}_0(\theta^{T}x) = \max (0, \theta^{T}x + 1)$, $m_0 = 1$ (the value of $m$ is not important, since we'll refer only to the conceptual case when `cost = 0`)
 
 In other words:
 
@@ -196,8 +196,35 @@ In summary, the example vectors are transformed into feature vectors. That is th
 
 ### 2.2 Cost Computation
 
+Since we use the feature vectors $f$ instead of $x$, our cost function is different now:
+
+$J(\theta) = - C \sum_{i=1}^{m} y^{(i)}\textrm{cost}_1(\theta^{T}f^{(i)}) + (1 - y^{(i)}) \textrm{cost}_0(\theta^{T}f^{(i)}) + \frac{1}{2} \sum_{j = 1}^{n=m}{\theta_{j}^{2}}$
+
+Note that beforehand we conceptually cancelled the first cost term assuming $C$ is chosen large. However, that is in practice not done. We won't and shouldn't manually minimize that cost function $J$; there are efficient algorithms for doing that.
+
+In practice, the regularization term is usually formulated as $\theta^{T}M\theta$, being $M$ a scaling matrix of size $m \times m$ (we ignore $\theta_0$). That is so in order to improve the efficiency of the algorithm, due to the large number of variables.
+
+Our model has now $m$ parameters instead of $n$. In other words, each example yields a parameter. Since we can expect $m >> n$, that is a property we should consider. One typical value of $m$ could be 10,000.
+
+**My intuitive understanding** is that we weight gaussian blobs centered in the examples we have. That generates a smooth manifold which evaluates how likely it is for a vector $x$ to belong to a class. The weights of the single blobs are the parameters $\theta$, and they amount to the training examples we have.
+
+All this is called **the kernel trick**. Unfortunately, it does not work in all learning algorithms as well as with the Support Vector Machines.
+
 ![SVM with Kernels: Cost](./pics/svm_kernel_cost.png)
 
 ### 2.3 Hyperparameters: `C` and `sigma` for Controlling Bias & Variance
+
+The regularization weighting factor `C` and the spread of the Gaussian kernel `sigma` can be used to control the bias and the variance of the model.
+
+`C = 1 / lambda`:
+
+- if we increase `C`, it is as we decrease `lambda`: larger parameters are allowed, more curvy: higher variance, lower bias
+- if we decrease `C`, the opposite happens
+
+`sigma`:
+
+- if we increase `sigma`, the spread of the kernels is widened, the blobs are smoother, boundaries are pushed farther away and they merge: less detail, lower variance, higher bias
+- if we decrease `sigma`, the opposite happens
+- check if we choose $\sigma$ or $\sigma^2$
 
 ![SVM with Kernels: Hyperparameters and Bias/Variance](./pics/svm_kernel_hyperparameters.png)
