@@ -13,7 +13,10 @@ An alternative would be to use Asciidoc, but rendering of equations is not strai
 Overview of contents:
 
 1. Large Margin Classification
-
+   - 1.1 Optimization Objective
+   - 1.2 Large Margin Classifier
+     - 1.2.1 Re-Writing the Cost Function
+2. Kernels: Non-Linear Complex Classifier
 
 ## 1. Large Margin Classification
 
@@ -69,7 +72,7 @@ h(x) = {1 if theta*x >= 0, 0 otherwise}
 
 ![SVM: Alternative View of Logistic Regression](./pics/svm_logistic_regression.png)
 
-### 1.1 Large Margin Classifier (Intuition)
+### 1.2 Large Margin Classifier
 
 Sometimes SVMs are called large margin classifiers. The reason for that is that we do the following with them:
 
@@ -80,7 +83,7 @@ Sometimes SVMs are called large margin classifiers. The reason for that is that 
 
 In the following, it is shown how that can be achieved.
 
-#### Re-Writing the Cost Function
+#### 1.2.1 Re-Writing the Cost Function
 
 Note that the `cost(z = theta*x) = 0` if `theta*x` is beyond a threshold:
 
@@ -149,3 +152,52 @@ In the figure slide, everything is simplified to have $\theta_0 = 0$, so that th
 
 Note that all that was possible by assuming that $C$ is very large. In practice, the larger $C$, the more accurate is the decision boundary: larger margin and less outliers escape.
 
+## 2. Kernels: Non-Linear Complex Classifier
+
+Kernels allow to create non-linear classifiers for SVMs; it is generalization to using higher order polynomial terms.
+
+Kernels are basically similarity functions between the original feature vector $x$ and landmarks $l^{(i)}$ located in the feature space: $k(x,l^{(i)})$.
+We can have different types of kernels (e.g., Gaussian or exponential); in general, if the similarity is large $k = 1$, otherwise $k = 0$.
+Similarity can be defined as the distance between $x$ and the landmark $l^{(i)}$.
+We apply one kernel per landmark creating a new feature, which is added to the model: $f_i = k(x,l^{(i)})$.
+The idea is that with kernels we create complex decision boundaries around the landmark points: points close to the landmarks have $y,h = 1$, points far away from the landmarks have $y,h = 0$.
+
+![SVM: Kernel Idea](./pics/svm_kernel_idea.png)
+
+The Gaussian kernel of a landmark $l^{(i)}$ which yields the feature $f_i$ is defined as:
+
+$$f_i = k(x,l^{(i)}) = \exp ( \frac{\Vert x - l^{(i)} \Vert}{2 \sigma^2}), \,\,x, l^{(i)} \in \mathbf{R}^{n}$$
+
+```
+f_i = k(x,l_i) = exp(dist(x,l_i)/(2*sigma^2))
+```
+
+It is a Gaussian blob of dimension $n$ centered in $l^{(i)}$ and spread $\sigma$; the larger the spread, the wider the blob, so the further the boundary from the landmark.
+
+Then, the model or hypothesis function would be:
+
+$$h(x) = \theta_0 + \theta_1 f_1 + \theta_2 f_2 + \theta_3 f_3 + ... \geq 0 \,\,\mathrm{if}\,\, y = 1$$
+
+### 2.1 Choosing the Landmarks and Feature Vectors
+
+We create a landmark for each example! Thus, if we have $m$ examples $x^{(i)}$, we will have $m$ associated landmarks $l^{(i)}$. Additionally, since the model adds up kernel features $f_i$, we have $n = m$.
+
+In summary, the example vectors are transformed into feature vectors. That is the process:
+
+- We take all $m$ examples $x^{(i)}$ of dimension $n+1$.
+- Each of these $x^{(i)}$ examples is used to build a feature variable with the chosen kernel function: $f_i = k(x,l^{(i)}=x^{(i)})$.
+- The hypothesis model is now: $h(x) = \theta_0 + \theta_1 f_1 + \theta_2 f_2 + ... + \theta_m f_m$
+- Note that $\theta$ is now of dimension $m + 1$! (Beforehand, it was of dimension $n+1$)
+- Given an example vector $x$, we transform it into the feature vector $f$ using the $m$ kernels.
+  - Note that $f = [f_0, f_1, f_2, ..., f_m]^{T}$, $f_0 = 1$
+  - Given $x^{(i)}$, its feature vector $f^{(i)}$ results after applying the kernels; the element number $i$ will be exactly $f^{(i)}_i = 1$, because the $i$th kernel was built using it. The rest of the elements evaluate the similarity with respect to the rest of the landmarks (i.e., examples).
+
+![SVM with Kernels: Feature vector](./pics/svm_kernel_feature_vector.png)
+
+### 2.2 Cost Computation
+
+![SVM with Kernels: Cost](./pics/svm_kernel_cost.png)
+
+### 2.3 Hyperparameters: `C` and `sigma` for Controlling Bias & Variance
+
+![SVM with Kernels: Hyperparameters and Bias/Variance](./pics/svm_kernel_hyperparameters.png)
