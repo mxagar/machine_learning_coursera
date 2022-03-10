@@ -17,6 +17,10 @@ Overview of contents:
    - 1.2 Large Margin Classifier
      - 1.2.1 Re-Writing the Cost Function
 2. Kernels: Non-Linear Complex Classifier
+   - 2.1 Choosing the Landmarks and Feature Vectors
+   - 2.2 Cost Computation
+   - 2.3 Hyperparameters: `C` and `sigma` for Controlling Bias & Variance
+3. SVMs in Practice
 
 ## 1. Large Margin Classification
 
@@ -77,7 +81,7 @@ h(x) = {1 if theta*x >= 0, 0 otherwise}
 Sometimes SVMs are called large margin classifiers. The reason for that is that we do the following with them:
 
 - We have a classification problem in a feature space with examples of different classes.
-- With SVM decision boundaries are defined such that the margin or distance from the decision boundary to the cluster of feature points is maximized.
+- With SVM, decision boundaries are defined such that the margin or distance from the decision boundary to the cluster of feature points is maximized.
 
 ![SVM: Large Margin Classifier](./pics/svm_large_margin_classifier.png)
 
@@ -154,7 +158,7 @@ Note that all that was possible by assuming that $C$ is very large. In practice,
 
 ## 2. Kernels: Non-Linear Complex Classifier
 
-Kernels allow to create non-linear classifiers for SVMs; it is generalization to using higher order polynomial terms.
+Kernels allow to create non-linear classifiers for SVMs; it is the generalization to using higher order polynomial terms.
 
 Kernels are basically similarity functions between the original feature vector $x$ and landmarks $l^{(i)}$ located in the feature space: $k(x,l^{(i)})$.
 We can have different types of kernels (e.g., Gaussian or exponential); in general, if the similarity is large $k = 1$, otherwise $k = 0$.
@@ -208,7 +212,7 @@ Our model has now $m$ parameters instead of $n$. In other words, each example yi
 
 **My intuitive understanding** is that we weight gaussian blobs centered in the examples we have. That generates a smooth manifold which evaluates how likely it is for a vector $x$ to belong to a class. The weights of the single blobs are the parameters $\theta$, and they amount to the training examples we have.
 
-All this is called **the kernel trick**. Unfortunately, it does not work in all learning algorithms as well as with the Support Vector Machines.
+All this is called **the kernel trick**. Unfortunately, it does not work in all learning algorithms so well as with the Support Vector Machines.
 
 ![SVM with Kernels: Cost](./pics/svm_kernel_cost.png)
 
@@ -228,3 +232,21 @@ The regularization weighting factor `C` and the spread of the Gaussian kernel `s
 - check if we choose $\sigma$ or $\sigma^2$
 
 ![SVM with Kernels: Hyperparameters and Bias/Variance](./pics/svm_kernel_hyperparameters.png)
+
+## 3. SVMs in Practice
+
+We should not optimize the cost function of the SVM model ourselves; instead, we should use available software: `libsvm`, `liblinear`. However, when using SVM libraries, wee need to choose some things:
+
+1. `C`: the regularization factor (`C = 1 / lambda`)
+   - Larger `C`, higher variance (more detail)
+2. The Kernel (similarity function) and its parameters. Usually two kernels are used:
+
+   - Linear kernel (no kernel): there similarity is the projection itself: `k = theta*x`, $k = \theta^T x$; this option is similar to performing logistic regression! However, I understand we have `m + 1` parameters, not `n + 1`.
+   - Gaussian kernel: `k = exp(dist(x,l_i)/(2*sigma^2)`; we need to choose the `sigma(^2)` scaling parameter here!
+   - Other less used kernels:
+     - Polynomial: `k = (theta*x + coeff)^(degree)`; the offset coefficient and the polynomial degree need to be chosen
+     - Other more esoteric: String similarity, Chi square, ...
+
+### Which option choose when?
+
+`n` large, `m` small: 
