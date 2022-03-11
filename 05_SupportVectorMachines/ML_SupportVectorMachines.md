@@ -23,6 +23,7 @@ Overview of contents:
 3. SVMs in Practice
    - 3.1 Multi-class Classification
    - 3.2 Which Option Choose when?
+4. Exercise 6: Support Vector Machines (SVMs)
 
 ## 1. Large Margin Classification
 
@@ -282,3 +283,6 @@ However, if not, we can implement the one-vs-all method:
 Neural networks could work too, but
 - training takes longer
 - **SVM is a convex optimization function, so global optima are always found**, in contrast to NNs, which might struggle with local optima
+
+## 4. Exercise 6: Support Vector Machines (SVMs)
+
