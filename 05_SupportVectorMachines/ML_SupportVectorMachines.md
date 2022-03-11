@@ -241,12 +241,42 @@ We should not optimize the cost function of the SVM model ourselves; instead, we
    - Larger `C`, higher variance (more detail)
 2. The Kernel (similarity function) and its parameters. Usually two kernels are used:
 
-   - Linear kernel (no kernel): there similarity is the projection itself: `k = theta*x`, $k = \theta^T x$; this option is similar to performing logistic regression! However, I understand we have `m + 1` parameters, not `n + 1`.
+   - Linear kernel (like no kernel): `k = x*l_i`; this option is similar to performing logistic regression! We basically have "predict $y = 1$ if $\theta^Tx \geq 0$". However, I understand we have `m + 1` parameters, not `n + 1`.
    - Gaussian kernel: `k = exp(dist(x,l_i)/(2*sigma^2)`; we need to choose the `sigma(^2)` scaling parameter here!
    - Other less used kernels:
-     - Polynomial: `k = (theta*x + coeff)^(degree)`; the offset coefficient and the polynomial degree need to be chosen
+     - Polynomial: `k = (x*l_i + coeff)^(degree)`; the offset coefficient and the polynomial degree need to be chosen
      - Other more esoteric: String similarity, Chi square, ...
+
+**Very important**: any time we have a similarity kernel that computes a distance, we need to scale all variables; otherwise, the length of the norm is not realistic: variables with larger values (e.g., square feet vs. number of bedrooms) wrongly dominate the resulting kernel.
+
+Usually the linear and Gaussian kernels are used -- in some rare cases the polynomial. If we choose another one, we need to make sure they satisfy the Mercer's Theorem: this theorem is used during the optimization, to avoid divergence.
+
+### Multi-class Classification
+
+SVM packages have already multi-class implementations.
+
+However, if not, we can implement the one-vs-all method:
+- We split the dataset of K classes in K datasets, each labelled as class k against the rest
+- We optimize theSVM model for each to obtain `theta_k`
+- With new examples (inference), we evaluate all K models and choose the one with the largest `theta_k*x`
 
 ### Which option choose when?
 
-`n` large, `m` small: 
+`n`: number of original features
+`m`: number of examples
+
+`n/m = 0.1`
+- SVM Gaussian Kernel
+
+`n/m = 10`
+- SVM Linear Kernel, or
+- Logistic regression
+ 
+`n/m = 100`
+- Create add more features, and then:
+  - SVM Linear Kernel, or
+  - Logistic regression
+
+Neural networks could work too, but
+- training takes longer
+- **SVM is a convex optimization function, so global optima are always found**, in contrast to NNs, which might struggle with local optima
