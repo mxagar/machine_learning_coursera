@@ -21,6 +21,8 @@ Overview of contents:
    - 2.2 Cost Computation
    - 2.3 Hyperparameters: `C` and `sigma` for Controlling Bias & Variance
 3. SVMs in Practice
+   - 3.1 Multi-class Classification
+   - 3.2 Which Option Choose when?
 
 ## 1. Large Margin Classification
 
@@ -251,7 +253,7 @@ We should not optimize the cost function of the SVM model ourselves; instead, we
 
 Usually the linear and Gaussian kernels are used -- in some rare cases the polynomial. If we choose another one, we need to make sure they satisfy the Mercer's Theorem: this theorem is used during the optimization, to avoid divergence.
 
-### Multi-class Classification
+### 3.1 Multi-class Classification
 
 SVM packages have already multi-class implementations.
 
@@ -260,7 +262,7 @@ However, if not, we can implement the one-vs-all method:
 - We optimize theSVM model for each to obtain `theta_k`
 - With new examples (inference), we evaluate all K models and choose the one with the largest `theta_k*x`
 
-### Which option choose when?
+### 3.2 Which Option Choose when?
 
 `n`: number of original features
 `m`: number of examples
