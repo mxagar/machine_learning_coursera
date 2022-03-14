@@ -729,7 +729,7 @@ Workflow:
 7. Visualization of the Hidden Layer Weights
 8. Python Notes
 
-It is recommended to ahe a look at the notebook, because images and formulas are displayed in it.
+It is recommended to have a look at the notebook, because images and formulas are displayed in it.
 Here, the most important code pieces are shown.
 Have a look at the python notes notebook if necessary, but I think no new concepts are introduced.
 
