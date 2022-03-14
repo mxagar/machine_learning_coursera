@@ -353,7 +353,7 @@ Workflow:
     - 3.3 Training SVM for Spam Classification
     - 3.4 Top Predictors for Spam
 
-Have a look at the notebook; most visualization and training procedures are provided and used in the notebook. In particular, look at the `processEmail` function: all steps in it are very interesting, specially the `porterStemmer` implementation
+Have a look at the notebook; most visualization and training procedures are provided and used in it. In particular, look at the `processEmail` function: all steps in it are very interesting, specially the `porterStemmer` implementation. The python implementation is also interesting for future use in simplified scenarios!
 
 A summary of the most important part is provided in the following:
 
