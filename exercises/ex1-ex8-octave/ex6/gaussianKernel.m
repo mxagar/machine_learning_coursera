@@ -16,10 +16,10 @@ sim = 0;
 %
 %
 
-
-
-
-
+% Distance between variable (x1) and landmark (x2)
+d = x1 - x2;
+% Gaussian
+sim = exp(-(d'*d)/(2*sigma*sigma));
 
 % =============================================================
     

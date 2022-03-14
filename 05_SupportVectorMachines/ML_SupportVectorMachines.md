@@ -179,7 +179,9 @@ $$f_i = k(x,l^{(i)}) = \exp ( \frac{\Vert x - l^{(i)} \Vert}{2 \sigma^2}), \,\,x
 f_i = k(x,l_i) = exp(dist(x,l_i)/(2*sigma^2))
 ```
 
-It is a Gaussian blob of dimension $n$ centered in $l^{(i)}$ and spread $\sigma$; the larger the spread, the wider the blob, so the further the boundary from the landmark.
+It is a Gaussian blob of dimension $n$ centered in $l^{(i)}$ and spread $\sigma$; the larger the spread, the wider the blob, so the further the boundary from the landmark. This spread is the bandwidth with which we define how fast the similarity decreases, i.e., falls to `0`.
+
+The **Gaussian Kernel** is also known as **Radial Basis Function (RBF)**.
 
 Then, the model or hypothesis function would be:
 
