@@ -23,11 +23,34 @@ sigma = 0.3;
 %        mean(double(predictions ~= yval))
 %
 
-
-
-
-
-
+% Possible C & sigma values
+C_pool = [0.01, 0.03, 0.1, 0.3, 1, 3, 10, 30];
+sigma_pool = [0.01, 0.03, 0.1, 0.3, 1, 3, 10, 30];
+% Accuracy for each C-sigma combination
+accuracy = zeros(1,size(C_pool,2)*size(sigma_pool,2));
+max_accuracy = 0;
+count = 1;
+for i = 1:size(C_pool,2)
+    for j = 1:size(sigma_pool,2)
+        % Choose params
+        c = C_pool(i);
+        s = sigma_pool(j);
+        % Train with training set
+        model = svmTrain(X, y, c, @(x1, x2) gaussianKernel(x1, x2, s));
+        % Cross-Validation: accuracy?
+        pred = svmPredict(model, Xval);
+        acc = mean(double(pred == yval));
+        accuracy(1,count) = acc;
+        % Choose if best pair (best accuracy so far)
+        if acc > max_accuracy
+            max_accuracy = acc;
+            C = c;
+            sigma = s;
+        end
+        % Increase C-sigma combination counter
+        count = count + 1;
+    end
+end
 
 % =========================================================================
 
