@@ -12,6 +12,94 @@ An alternative would be to use Asciidoc, but rendering of equations is not strai
 
 Overview of contents:
 
-1. A
-## 1. A
+1. Unsupervised Learning: Introduction
+2. Clustering: K-Means Algorithm
+   - 2.1 K-Means Algorithm
+   - 2.2 Optimization Objective or Cost Function of the K-Means Algorithm
+   - 2.3 Random Initialization and Local Optima
+   - 2.4 Choosing the Number of Clusters
+3. Dimensionality Reduction: Principal Component Analysis (PCA)
+
+## 1. Unsupervised Learning: Introduction
+
+In unsupervised learning we don't have labels for our data. Instead, we try to find structure in the dataset. Typical applications are:
+
+- Clustering of similar data examples/points
+- Dimensionality reduction: when we have many features, the most relevant ones can be chosen
+
+## 2. Clustering: K-Means Algorithm
+
+We have an unlabelled dataset and we would like to group the data examples/points in groups according to the similarity metric we define.
+
+### 2.1 K-Means Algorithm
+
+K-means is an iterative algorithm that works in two steps that are continuously repeated: (1) cluster centroids are **assigned** and (2) cluster centroids are **shifted/moved**. The algorithm is as follows:
+
+0. Given a dataset `x_1, x_2, ..., x_m` with each point of dimension `n`, we want to group the `m` points/examples according t o similarity, defined by their distance in the feature space. Note that the dimension `0` of each `x` is dropped by convention.
+1. We select the number of cluster centers we want to have `K`. Obviously, `K < m`, i.e., the number of clusters is expected to be smaller than the number of examples or data-points we have.
+2. We set random centers `mu_1, ..., mu_K` in the feature space.
+
+$$\mu_1, ..., \mu_k, ..., \mu_K \in \mathbf{R}^{n}$$
+
+3. For each example `i = 1, ..., m` we compute which is is the closest centroid `k = 1, ..., K`; we **assign** or label each example to its closest centroid; those labels are `c_1, ..., c_m`, and they correspond to one index in `{1, ..., K}`.
+
+$$c^{(i)} = \min_k \Vert x^{(i)} - \mu_{k} \Vert $$
+
+4. We recompute the centroid `mu_k` of each group/cluster `k` of the data-points by averaging all data-points in a cluster/group, and **shift/move** the centroid to that average; all data-points are traversed for that.
+
+$$\mu_k \leftarrow \frac{1}{q} \sum_{q\,:\, i | c^{(i)} = k} x^{(i)}$$
+
+5. We repeat steps 3 & 4 until there is a convergence.
+
+If in the process a cluster centroid ends being being assigned to no points, we either (1) remove it or (2) re-initialize it randomly somewhere else.
+
+K-means creates clusters even though data-points do not seem to be clearly separable; that is not really an issue always: we are just segmenting the dataset according to the number of groups we'd like. For instance, T-Shirt size ranges S, M, L mapped to a continuum dataset containing height-width as values.
+
+### 2.2 Optimization Objective or Cost Function of the K-Means Algorithm
+
+The cost function of the k-means algorithm is also called the **distortion function**, and it is simply the sum sum of all the distances from each data-point to its associated cluster centroid. We want to minimize that.
+
+$$J(c,\mu) = \frac{1}{m} \sum_{i = 1}^{m} \Vert x^{(i)} - \mu_{c^{(i)}} \Vert^2$$
+
+```
+J(c,mu) = (1/m) * sum(dist(x_i - mu(c_i)))
+```
+
+It can be proven that the two major steps in the algorithm minimize that cost:
+
+1. the **assign** step minimizes `J` with respect to the labels `c` while maintaining the centroids `mu` constant;
+2. the **move** step minimizes `J` with respect to `mu` while maintaining the labels `c` constant.
+
+Thus, we can use the distortion or cost function `J` to debug how the algorithm is running; there is no need to differentiate it, since the minimization is already in the algorithm itself.
+
+**Important feature of `J`: it always decreases with the iterations**; however, different initializations of the centroids might lead to higher `J` values.
+
+### 2.3 Random Initialization and Local Optima
+
+K-means can end up with a different solution depending on the initialization. **The best approach is to select `K` random data-points from our dataset as initial centroids.**
+
+In fact, k-means is prone to falling into local optima of the `J` minimization; the only way to deal with that is to perform several random initializations as suggested: choosing `K` random points from the dataset as initial centroids. Thus:
+
+- we run k-means 50-1000 ties with different random initializations,
+- we compute the cost function `J` at the end of each,
+- and we pick the run with the smallest `J`.
+
+However, note that multiple random initializations are effective if the number of clusters is relatively slow, e.g., `K = 2-10`; if we have many clusters, the results won't change so much.
+
+Examples of local optima:
+
+![Local Optima in K-Means](./pics/k_means_local_optima.png)
+
+### 2.4 Choosing the Number of Clusters
+
+Often the number of clusters is given by the problem, or it can be visually identified in a scatterplot. However, sometimes it is not clear which number to choose: in that case, the **elbow method** is used.
+
+With the elbow method, we plot the distortion/cost function for ach value of `K`. As `K` increases, `J` will decrease, because centroids are closer to the data-points; if the contrary happens, the higher `K` landed in a local optimum and the algorithm needs to be re-run.
+By observing the final curve `J-vs-K`, we choose the `K` value that bends or changes the slope of the decreasing curve: the elbow.
+
+However, sometimes there is no elbow: the curve decreases smoothly; in that case, we need to think about the meaning of the different values of `K`.
+
+![Choosing the Number of Clusters: The Elbow Method](./pics/k_means_choosing_k_elbow.png)
+
+## 3. Dimensionality Reduction: Principal Component Analysis (PCA)
 
