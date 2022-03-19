@@ -19,6 +19,13 @@ Overview of contents:
    - 2.3 Random Initialization and Local Optima
    - 2.4 Choosing the Number of Clusters
 3. Dimensionality Reduction: Principal Component Analysis (PCA)
+   - 3.1 Principal Component Analysis (PCA): Idea
+   - 3.2 Principal Component Analysis (PCA): Algorithm
+4. Applying Principal Component Analysis (PCA)
+   - 4.1 Reconstruction from Compressed Representation
+   - 4.2 Choosing the Number of Principal Components
+   - 4.3 Advice for Applying PCA
+5. Exercise 7: K-means Clustering and Principal Component Analysis
 
 ## 1. Unsupervised Learning: Introduction
 
@@ -294,3 +301,5 @@ However, note that:
 
 - First, we should try the supervised learning algorithm without PCA! Only when it does not work as expected, should we consider using PCA.
 - Even though PCA reduces the number of features, using PCA to prevent overfitting is a bad idea, it is much better to use regularization! The reason is that PCA does not consider the `y` values, and by reducing the dimensions, we might be loosing relevant information; it might work or not.
+
+## 5. Exercise 7: K-means Clustering and Principal Component Analysis
