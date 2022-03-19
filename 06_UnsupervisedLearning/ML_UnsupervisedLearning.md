@@ -161,22 +161,29 @@ Then, the **principal components of the covariance matrix** are found; that lead
 - the direction vectors $u_1, u_2,..., u_k$
 - the projected data-points with a lower dimensionality: $z^{(1))}, ..., z^{(m)}$, $z \in \mathbf{R}^{k}$
 
-The covariance matrix is
+The **covariance matrix** is
 
 $$ \Sigma = \frac{1}{m} \sum_{i=1}^{n}(x^{(i)})(x^{(i)})^{T}$$
 
 ```
-Sigma = (1/m) * sum(x * x')
+X = [x1'; x2'; ...; xm']; % xi': 1 x n, x_0 not used!
+Sigma = (1/m) * X' * X; % n x n
+
 x : n x 1
 x' : 1 x n
-Sima: n x n
 ```
 
 The principal components and directions are the eigenvectors and eigenvalues, which can be found with the singular-value decomposition:
 
 ```
 [U, S, V] = svd(Sigma)
-U : n x n -> columns are u_1, u_2, ..., u_n
+
+U : n x n -> eigen-vectors of Sigma are columns: u_1, u_2, ..., u_n
+S : diagonal matrix with eigen-values of Sigma: S = diag(s_1, s_2, ..., s_n)
+V: m x m
+U*U': I
+V*V': I
+Sigma = U * S * V'
 ```
 
 Then:
@@ -188,7 +195,7 @@ Summary, in Octave:
 
 ```octave
 X = [x1'; x2'; ...; xm']; % xi': 1 x n, x_0 not used!
-Sigma = (1/m) * X' * X;
+Sigma = (1/m) * X' * X; % n x n
 [U, S, V] = svd(Sigma);
 Ureduce = U(:,1:k);
 z = Ureduce'*x; % x_0 not used!
@@ -197,6 +204,8 @@ z = Ureduce'*x; % x_0 not used!
 Note that an alternative to `svd(Sigma)` is `eig(Sigma)`, which would produce the same values, but it is less robust/stable numerically.
 
 Have in mind or draw the shape and contents of `U, Ureduced, X, xi, z, ...`.
+Note that `U` and `V` are two rotation matrices, while `S` is a scaling matrix.
+
 
 ![Principal Component Analysis: Summary](./pics/principal_component_analysis_summary.png)
 
@@ -225,20 +234,63 @@ Since we have normalized/scaled the data, all vectors are centered in 0, so the 
 
 $$S = \frac{1}{m} \sum_{i = 1}^{m} \Vert x^{(i)} \Vert ^2$$
 
-`S = (1/m) * sum(length(x)^2)`
+`L = (1/m) * sum(length(x)^2)`
 
 Additionally, the average squared projection error is:
 
 $$S_p = \frac{1}{m} \sum_{i = 1}^{m} \Vert x^{(i)} - x_{approx}^{(i)} \Vert ^2$$
 
-`Sp = (1/m) * sum(length(x - x_approx)^2)`
+`Lp = (1/m) * sum(length(x - x_approx)^2)`
 
-Note that the PCA algorithm tries to minimize $S_p$.
+Note that the PCA algorithm tries to minimize $L_p$.
 
 Typically, $k$ is chosen so that 
 
-$$\frac{S_p}{S} \leq \alpha$$,
+$$\frac{L_p}{L} \leq \alpha$$,
 
 with $\alpha \in [0.01, 0.1]$.
 
 If `alpha = 0.01`, `99% = 1 - 0.01` of the variance is retained, i.e., we loose `1%` of the information.
+
+In practice, it is possible to significantly reduce the dimensionality or compress the dataset with that small `alpha`, because the features tend to be very correlated!
+
+Now, instead of computing the $L_p$ values for different $k$ values, we can use the singular values obtained after calling `svd()`. These are the eigenvalues of the decomposition, contained in the diagonal matrix `S = diag(S_11, S_22, ..., S_nn)`. It turns out that the fraction summed of the chosen $k$ eigenvalues is the retained variability:
+
+$$ \frac{\sum_{i = 1}^{k} S_{ii}}{\sum_{i = 1}^{n} S_{ii}} = 1 - \alpha$$
+
+```
+sum(S_ii, i = 1:k) / sum(S_ii, i = 1:n) = 1 - alpha
+```
+
+Thus: we run `svd()` and choose the `k` value that yields a ratio above the desired percentage.
+
+Note that in the first fraction ($L$), the sum is over $m$ (number of data-points), whereas in the second fraction the sum is over $n$ (number of features or dimensions).
+
+Important: **If we apply PCA, always report the fraction of variance retained!**
+
+### 4.3 Advice for Applying PCA
+
+We have seen the two major motivations for PCA:
+
+1. Compression
+2. Visualization, with `k = 2, 3`
+
+Compression is related to two sub-motivations:
+
+- We reduce the disk storage
+- We can speed up the supervised learning algorithm.
+
+Indeed, we can follow this approach to speed up a supervised learning algorithm:
+
+- Take the independent variables `x` from the **training** split of the labelled dataset, forgetting the dependent variables `y`
+- Compute PCA for our desired retained variance: we get  `Ureduced`
+- Transform our `x` variables to be `z`: we have compressed the dimension, e.g. from 1000 to 100
+- Perform the supervised learning training: since we have `10x` less features, the training is much faster!
+- When we have a new `x`, we get `z = Ureduced' * x`
+
+Note that the PCA should be performed only with the training split, not the cross-validation or test splits; however, since the model is in `z`-space, we do need to map the examples from the cross-validation and test splits to the `z`-space.
+
+However, note that:
+
+- First, we should try the supervised learning algorithm without PCA! Only when it does not work as expected, should we consider using PCA.
+- Even though PCA reduces the number of features, using PCA to prevent overfitting is a bad idea, it is much better to use regularization! The reason is that PCA does not consider the `y` values, and by reducing the dimensions, we might be loosing relevant information; it might work or not.
