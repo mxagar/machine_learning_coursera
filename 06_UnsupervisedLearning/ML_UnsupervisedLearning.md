@@ -127,3 +127,118 @@ Data visualization requires to reduce the dimensionality to 2D or 3D; displaying
 Example: world countries with 50 features each (GDP, population, Gini index, etc.). These 50 variables can be reduced to 2 variables $z_1, z_2$, and we can see in a scatterplot how similar countries are among each other.
 
 ![Data visualization](./pics/data_visualization_countries.png)
+
+### 3.1 Principal Component Analysis (PCA): Idea
+
+We use Principal Component Analysis (PCA) to find the structures or hyperplanes onto which we project our data-points loosing the least information as possible. That is achieved by minimizing the sum of orthogonal distances from the data-points to the parametrized hyperplane.
+
+Note that this is related to linear regression, but it is different, and it ultimately yields a different solution, and a different algorithm: 
+
+- in linear regression, the squared distance in $y$ between the hyperplane and the data-points is minimized: $\Delta y$;
+- in PCA, the orthogonal distance between the hyperplane and the data-points is minimized. That implies that we project the $\Delta y$ in the normal vector of the hyperplane.
+
+With PCA, we reduce from $n$-dimension to $k$-dimension by finding $k$ vectors $u^{(1)}, u^{(2)}, ..., u^{(k)}$
+onto which to project the data, so as to minimize the projection error.
+
+In other words: **we are trying to find a lower dimensional base frame that minimizes the distances from the data-points to its axes**.
+
+![Principal Component Analysis](./pics/principal_component_analysis.png)
+
+### 3.2 Principal Component Analysis (PCA): Algorithm
+
+First, we need to **normalize or scale** our data!
+
+One typical approach is mean normalization with range scaling, if the ranges of the features differ:
+
+$x_j^{(i)} \leftarrow \frac{x_j^{(i)} - \mu_j}{s_j}$
+
+$\mu_j = \frac{1}{m} \sum_{i = 1}^{m} x_j^{(i)}$
+
+$s_j$: standard deviation $\sigma_j$ or range $\max{x_j}-\min{x_j}$ of feature $x_j$.
+
+Then, the **principal components of the covariance matrix** are found; that leads to:
+
+- the direction vectors $u_1, u_2,..., u_k$
+- the projected data-points with a lower dimensionality: $z^{(1))}, ..., z^{(m)}$, $z \in \mathbf{R}^{k}$
+
+The covariance matrix is
+
+$$ \Sigma = \frac{1}{m} \sum_{i=1}^{n}(x^{(i)})(x^{(i)})^{T}$$
+
+```
+Sigma = (1/m) * sum(x * x')
+x : n x 1
+x' : 1 x n
+Sima: n x n
+```
+
+The principal components and directions are the eigenvectors and eigenvalues, which can be found with the singular-value decomposition:
+
+```
+[U, S, V] = svd(Sigma)
+U : n x n -> columns are u_1, u_2, ..., u_n
+```
+
+Then:
+
+- If we want to reduce from $n$ dimensions to $k$, we simply take the first $k$ $u$ vectors: `U_reduced = [u_1, u_2, ..., u_k]`.
+- The transformed or reduced data-points $z$ are: `z = (U_reduced)' * x`. Note the dimensions: `(k x n) x (n x 1) = k x 1`.
+
+Summary, in Octave:
+
+```octave
+X = [x1'; x2'; ...; xm']; % xi': 1 x n, x_0 not used!
+Sigma = (1/m) * X' * X;
+[U, S, V] = svd(Sigma);
+Ureduce = U(:,1:k);
+z = Ureduce'*x; % x_0 not used!
+```
+
+Note that an alternative to `svd(Sigma)` is `eig(Sigma)`, which would produce the same values, but it is less robust/stable numerically.
+
+Have in mind or draw the shape and contents of `U, Ureduced, X, xi, z, ...`.
+
+![Principal Component Analysis: Summary](./pics/principal_component_analysis_summary.png)
+
+## 4. Applying Principal Component Analysis (PCA)
+### 4.1 Reconstruction from Compressed Representation
+
+We can go back from the compressed representation `z` to the original dimension `x` with `Ureduce`. We obtain the projected data-points, but we represent them in the higher dimensional feature space (`n`), not in the reduced hyperplane (`k`). Of course, the reconstructed points are an approximation.
+
+```
+X = [x1'; x2'; ...; xm']; % xi': 1 x n, x_0 not used!
+Sigma = (1/m) * X' * X;
+[U, S, V] = svd(Sigma);
+Ureduce = U(:,1:k);
+z = Ureduce'*x; % x_0 not used!
+
+x_approx = Ureduce * z; % n x 1 = (n x k) x (k x 1)
+```
+
+![Principal Component Analysis: Reconstruction](./pics/pca_reconstruction.png)
+
+### 4.2 Choosing the Number of Principal Components
+
+The number of principal components `k` is the parameter we need to choose. That number is chosen according to the variance that is preserved when reducing the dimensionality.
+
+Since we have normalized/scaled the data, all vectors are centered in 0, so the **total variance** of the data is:
+
+$$S = \frac{1}{m} \sum_{i = 1}^{m} \Vert x^{(i)} \Vert ^2$$
+
+`S = (1/m) * sum(length(x)^2)`
+
+Additionally, the average squared projection error is:
+
+$$S_p = \frac{1}{m} \sum_{i = 1}^{m} \Vert x^{(i)} - x_{approx}^{(i)} \Vert ^2$$
+
+`Sp = (1/m) * sum(length(x - x_approx)^2)`
+
+Note that the PCA algorithm tries to minimize $S_p$.
+
+Typically, $k$ is chosen so that 
+
+$$\frac{S_p}{S} \leq \alpha$$,
+
+with $\alpha \in [0.01, 0.1]$.
+
+If `alpha = 0.01`, `99% = 1 - 0.01` of the variance is retained, i.e., we loose `1%` of the information.
