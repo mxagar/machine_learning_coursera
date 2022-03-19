@@ -103,3 +103,27 @@ However, sometimes there is no elbow: the curve decreases smoothly; in that case
 
 ## 3. Dimensionality Reduction: Principal Component Analysis (PCA)
 
+Dimensionality reduction consists in finding the hyperplane structure in feature space onto which we can project our examples loosing the least amount of information. With that operation, we basically remove one dimension to all examples, or equivalently, to our variable:
+
+- in 2D we project the points to a line and work later on in 1D;
+- in 3D we project the points onto a plane and work in 2D later on;
+- etc.
+
+$$x^{(i)} \in \mathbf{R}^{D} \rightarrow z^{(i)} \in \mathbf{R}^{D-1}$$
+
+So that this dimensionality reduction works, we consider there might be some high correlation somewhere between the variables; if not, we loose information; if that correlation exists, the tasks consists in finding the hyperplane that reflects that relationship.
+
+Usual applications consist in reducing from `1000-D` to `100-D`; having redundant/correlated features or dimensions is common, because often, when defining the problem, we don't know how correlated they are - thus, we are conservative and collect too many types of measurements.
+
+The **motivations for dimensionality reduction** are mainly two:
+
+1. We can **compress** our data.
+2. We **simplify** our data, so that we can be able **to visualize** it better.
+
+![Data compression](./pics/data_compression.png)
+
+Data visualization requires to reduce the dimensionality to 2D or 3D; displaying our dataset might provide us valuable insights. However, the reduced dimensions have not always a clear definition, or they might be a linear combination of some original variables.
+
+Example: world countries with 50 features each (GDP, population, Gini index, etc.). These 50 variables can be reduced to 2 variables $z_1, z_2$, and we can see in a scatterplot how similar countries are among each other.
+
+![Data visualization](./pics/data_visualization_countries.png)
