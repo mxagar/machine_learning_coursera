@@ -20,11 +20,13 @@ S = zeros(n);
 %       number of examples).
 %
 
+% Covariance matrix
+Sigma = (1/m) * X' * X;
 
-
-
-
-
+% Singular Value Decomposition:
+% Eigenvectors: U (columns)
+% EIgenvalues: S (diagonal)
+[U, S, V] = svd(Sigma);
 
 % =========================================================================
 
