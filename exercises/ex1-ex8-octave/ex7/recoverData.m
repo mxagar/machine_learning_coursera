@@ -21,6 +21,15 @@ X_rec = zeros(size(Z, 1), size(U, 1));
 %               Notice that U(j, 1:K) is a row vector.
 %               
 
+% Since we are undoing the mapping
+% I would have expected that we need to invert the rotation
+% Since U*U' = I, U' = inv(U)
+% Then, we would have taken again the first K columns
+UT = U'; % n x n
+%X_rec = UT(:, 1:K)*Z'; % n x m
+% BUT: The logic above does not work
+X_rec = U(:, 1:K)*Z'; % n x m
+X_rec = X_rec'; % m x n
 
 
 % =============================================================
