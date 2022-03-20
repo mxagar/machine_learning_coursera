@@ -21,9 +21,21 @@ idx = zeros(size(X,1), 1);
 % Note: You can use a for-loop over the examples to compute this.
 %
 
+% Number of examples
+m = size(X,1);
 
+% Squared distances from centroid to each example (loop)
+dist2 = zeros(1,K);
 
-
+% Loop through all examples, all centroids
+for i = 1:m
+    for k = 1:K
+        d = X(i,:) - centroids(k,:);
+        dist2(1,k) = d*d';
+    end
+    [v, ind] = min(dist2);
+    idx(i,1) = ind;
+end
 
 
 
