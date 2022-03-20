@@ -303,3 +303,238 @@ However, note that:
 - Even though PCA reduces the number of features, using PCA to prevent overfitting is a bad idea, it is much better to use regularization! The reason is that PCA does not consider the `y` values, and by reducing the dimensions, we might be loosing relevant information; it might work or not.
 
 ## 5. Exercise 7: K-means Clustering and Principal Component Analysis
+
+In this exercise, has two major parts:
+
+1. K-Means clustering used to compress an image.
+2. Principal Component Analysis (PCA) to find low-dimensional representations of images.
+
+Files provided by Coursera, located under `../exercises/ex1-ex8-octave/ex7`
+
+- `ex7.m` - Octave/MATLAB script for the first exercise on K-means
+- `ex7_pca.m` - Octave/MATLAB script for the second exercise on PCA
+- `ex7data1.mat` - Example Dataset for PCA
+- `ex7data2.mat` - Example Dataset for K-means
+- `ex7faces.ma` - Faces Dataset
+- `bird_small.png` - Example Image
+- `displayData.` - Displays 2D data stored in a matrix
+- `drawLine.m` - Draws a line over an exsiting figure
+- `plotDataPoints.m` - Initialization for K-means centroids
+- `plotProgresskMeans.` - Plots each step of K-means as it proceeds
+- `runkMeans.m` - Runs the K-means algorithm
+- `submit.m` - Submission script that sends your solutions to our servers
+
+Files to complete:
+
+- `pca.m` - Perform principal component analysis
+- `projectData.m` - Projects a data set into a lower dimensional space
+- `recoverData.m` - Recovers the original data from the projection 
+- `findClosestCentroids.m` - Findclosestcentroids(usedin K-means)
+- `computeCentroids.m` - Compute centroid means (used in K-means)
+- `kMeansInitCentroids.m` - Initialization for K-means centroids
+
+Workflow:
+
+- Download latest Octave version of exercise from Coursera
+- Complete code in exercise files following `ex7.pdf`
+- Whenever an exercise part is finished
+  - Check it with `ex7` and `ex7_spam` in Octave terminal
+  - Create a submission token on Coursera (exercise submission page, it lasts 30 minutes)
+  - Execute `submit` in Octave terminal
+  - Introduce email and token
+  - Results appear
+
+**Overview of contents:**
+
+0. Setup: `gnuplot`
+1. Dataset Loading & Visualization
+2. K-Means Clustering - `ex7.m`
+    - 2.1 Implementing K-Means - `findClosestCentroids.m`, `computeCentroids.m`
+        - 2.1.1 Simplified Algorithm Function
+    - 2.2 Random Initialization - `kMeansInitCentroids.m`
+    - 2.3 Image Compression with K-Means
+3. Principal Component Analysis (PCA) - `ex7_pca.m`
+    - 3.1 Implementing PCA - `pca.m`
+    - 3.2 Dimensionality Reduction with PCA - `projectData.m`, `recoverData.m`
+4. PCA on Faces (Ungraded) - `ex7_pca.m`
+    - 4.1 Normalize Features and Apply PCA, and Visualize
+5. Visualization of the K-Means Clusters with PCA - `ex7_pca.m`
+
+The exercise is quite straightforward, the implemented functions are quite easy; however, the applications with the images (a general image and faces) are very interesting!
+
+Therefore, I copy here the most important code pieces, but the reader is encouraged to have a look at the notebook for the example applications.
+
+Python note: the singular value decomposition can be performed with `numpy` or `scipy`; the `numpy` call is as follows: `U, S, V = np.linalg.svd(Sigma)`.
+
+
+```octave
+
+%%% --- K-Means
+
+function idx = findClosestCentroids(X, centroids)
+    % X: m x n; m: examples
+    % centroids: K x n
+    % idx: m x 1
+    
+    % Number of examples
+    m = size(X,1);
+
+    % Set K: number of centroids
+    K = size(centroids, 1);
+
+    % You need to return the following variables correctly.
+    idx = zeros(size(X,1), 1);
+
+    % Squared distances from centroid to each example (loop)
+    dist2 = zeros(1,K);
+    
+    % Loop through all examples, all centroids
+    for i = 1:m
+        for k = 1:K
+            d = X(i,:) - centroids(k,:);
+            dist2(1,k) = d*d';
+        end
+        [v, ind] = min(dist2);
+        idx(i,1) = ind;
+    end
+end
+
+function centroids = computeCentroids(X, idx, K)
+
+    % Useful variables
+    [m n] = size(X);
+
+    % You need to return the following variables correctly.
+    centroids = zeros(K, n);
+
+    for k = 1:K
+        indices = find(idx == k);
+        centroids(k,:) = mean(X(indices,:));
+    end
+
+end
+
+function [centroids, idx] = runkMeans(X, initial_centroids, max_iters)
+
+    % Initialize values
+    [m n] = size(X);
+    K = size(initial_centroids, 1);
+    centroids = initial_centroids;
+    previous_centroids = centroids;
+    idx = zeros(m, 1);
+
+    % Run K-Means
+    for i=1:max_iters
+
+        % For each example in X, assign it to the closest centroid
+        idx = findClosestCentroids_(X, centroids);
+
+        % Given the memberships, compute new centroids
+        centroids = computeCentroids_(X, idx, K);
+    end
+
+end
+
+function centroids = kMeansInitCentroids_(X, K)
+    centroids = zeros(K, size(X, 2));
+    % Randomly reorder the indices of examples
+    randidx = randperm(size(X, 1));
+    % Take the first K examples as centroids
+    centroids = X(randidx(1:K), :);
+end
+
+% Load an example dataset
+load('ex7data2.mat');
+% Settings for running K-Means
+K = 3;
+max_iters = 10;
+% Initial centroids - they should be random examples
+initial_centroids = centroids = kMeansInitCentroids_(X, 3);
+% Run K-Means algorithm
+[centroids, idx] = runkMeans(X, initial_centroids, max_iters);
+
+%%% --- Principal Component Analysis (PCA)
+
+function [U, S] = pca(X)
+    % PCA Run principal component analysis on the dataset X
+    % [U, S, X] = pca(X) computes eigenvectors of the covariance matrix of X
+    % Returns the eigenvectors U, the eigenvalues (on diagonal) in S
+
+    % Useful values
+    [m, n] = size(X);
+
+    % You need to return the following variables correctly.
+    U = zeros(n);
+    S = zeros(n);
+
+    % Covariance matrix
+    Sigma = (1/m) * X' * X;
+
+    % Singular Value Decomposition:
+    % Eigenvectors: U (columns)
+    % EIgenvalues: S (diagonal)
+    [U, S, V] = svd(Sigma);
+end
+
+function Z = projectData(X, U, K)
+
+    % You need to return the following variables correctly.
+    Z = zeros(size(X, 1), K);
+
+    % Take first K columns / eigenvectors
+    U_reduced = U(:,1:K);
+
+    % Project the X examples to the reduced space of K <= n features
+    % In order to figure out the order and whether transpose or not
+    % draw the matrices and think of what we want to get
+    Z = U_reduced' * X';
+    Z = Z';
+
+end
+
+function X_rec = recoverData(Z, U, K)
+    % You need to return the following variables correctly.
+    X_rec = zeros(size(Z, 1), size(U, 1));
+
+    % Instructions: Compute the approximation of the data by projecting back
+    %               onto the original space using the top K eigenvectors in U.
+    %
+    %               For the i-th example Z(i,:), the (approximate)
+    %               recovered data for dimension j is given as follows:
+    %                    v = Z(i, :)';
+    %                    recovered_j = v' * U(j, 1:K)';
+    %
+    %               Notice that U(j, 1:K) is a row vector.
+    %               
+
+    % U: n x n
+    % Z: m x K
+    % X_rec: m x n
+
+    % Since we are undoing the mapping
+    % I would have expected that we need to invert the rotation
+    % Since U*U' = I, U' = inv(U)
+    % Then, we would have taken again the first K columns
+    UT = U'; % n x n
+    %X_rec = UT(:, 1:K)*Z'; % n x m
+    % BUT: The logic above does not work
+    X_rec = U(:, 1:K)*Z'; % n x m
+    X_rec = X_rec'; % m x n
+end
+
+
+load ('ex7data1.mat');
+
+%  Before running PCA, it is important to first normalize X
+[X_norm, mu, sigma] = featureNormalize(X);
+
+%  Run PCA
+[U, S] = pca(X_norm);
+
+%  Project the data onto K = 1 dimension
+K = 1;
+Z = projectData(X_norm, U, K);
+
+X_rec  = recoverData(Z, U, K);
+
+```
