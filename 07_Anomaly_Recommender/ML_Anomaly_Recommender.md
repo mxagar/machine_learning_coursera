@@ -138,3 +138,16 @@ For example: let's image that in a data-center a computer can get unresponsive d
 
 ### 1.7 Multivariate Gaussian Distribution
 
+The univariate model built until now assumes that the features are independent from one another. However, when correlations between features are not negligible (which is usually the case), the model does not capture correctly the multi-dimensional distribution, and thus, the predicted `p` values are not correct.
+
+What is happening is that instead of having skewed and stretched bell-shapes, as we should, we have blobby and round curves, which do not capture the real distribution.
+
+![Multivariate Gaussian: Motivation](./pics/multivariate_gaussian_motivation.png)
+
+In such cases, instead of using a univariate Gaussian distribution obtained after multiplying supposedly independent Gaussians, it is better to use the **Mulivariate Gaussian** distribution, which is not a product, but a multivariate function:
+
+...
+
+Note the **covariance matrix**
+
+...
