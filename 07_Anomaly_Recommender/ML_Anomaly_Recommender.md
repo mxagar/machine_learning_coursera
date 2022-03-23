@@ -13,6 +13,17 @@ An alternative would be to use Asciidoc, but rendering of equations is not strai
 Overview of contents:
 
 1. Anomaly Detection
+   - 1.1 Problem Motivation
+   - 1.2 (Univariate) Gaussian Distribution
+   - 1.3 Anomaly Detection Algorithm Based on the Gaussian Distribution
+   - 1.4 Developing and Evaluating an Anomaly Detection System
+   - 1.5 Anomaly Detection vs. Supervised Learning
+   - 1.6 Choosing Features in Anomaly Detection
+   - 1.7 Multivariate Gaussian Distribution
+   - 1.8 Anomaly Detection using the Multivariate Gaussian Distribution
+   - 1.9 Univariate vs. Multivariate Gaussians
+2. Recommender Systems
+
 
 
 ## 1. Anomaly Detection
@@ -32,7 +43,7 @@ Typical applications:
 - Manufacturing: features of machines are recorded (e.g., heat vibrations, etc.) to predict anomalous functioning.
 - Data centers: features of computers and network are recorded to detect anomalous situations that might be associated to something not working properly (e.g., CPU load, network traffic, memory use, etc.).
 
-### 1.2 Gaussian Distribution
+### 1.2 (Univariate) Gaussian Distribution
 
 A variable that follows the Gaussian or Normal distribution with mean $\mu$ and variance $\sigma^2$:
 
@@ -185,4 +196,65 @@ The covariance matrix has these properties:
 
 
 ![Covariance Matrix: Examples](./pics/covariance_matrix_examples.png)
+
+### 1.8 Anomaly Detection using the Multivariate Gaussian Distribution
+
+The algorithm is basically the same:
+
+- Get all `m` examples, each of dimension `n` (i.e., `n` features).
+- Compute the mean vector `mu` and the covariance matrix `Sigma`.
+- The probability model `p(x)` is aforementioned formula.
+- Evaluate `p()` given a new `x_test`: if `p(x_test) < epsilon`, ANOMALY.
+
+### 1.9 Univariate vs. Multivariate Gaussians
+
+It can be shown that the Univariate Gaussian is the Multivariate Gaussian when the latter is axis aligned, i.e., the covariance matrix diagonal.
+
+Therefore, if we have correlations between features, the univariate Gaussian will not capture them, unless we introduce them as new features, e.g., `x_3 = x_1 / x2`.
+
+However, the univariate Gaussian is more frequently used, because it is computationally much less expensive and, thus, it scales much better (we don't need to compute the inverse, etc.).
+
+Summary of differences and practical advise:
+
+- `n`: If we have many features (`n > 10,000`), we can use the univariate version, because it is mucch less computationally expensive.
+- Correlations: In the univariate version, we should add manually combinations of features is we see there is a string correlation between them, e.g., `x_3 = x_1 / x2`; otherwise, that correlation won't be captured. In the multivariate version, there is no need for that.
+- `m`: In the multivariate version, we need to have `m > n` - recommended: `m >= 10*n`; in the univariate version, `m` can be small!
+- Redundant features: the inverse of the covariance won't exist (`det(Sigma) = 0`) if a variable is a linear combination of others or itself; thus, we need to detect those redundant variables and erase them. The univariate option does not have this issue.
+
+![Univariate vs. Multivariate Gaussians](./pics/univariate_vs_multivariate_gaussians.png)
+
+## 2. Recommender Systems
+
+Even though recommender systems are not that popular in the academia, they are very popular in the industry, because they bring a lot of money (e.g., Amazon, Netflix, etc.). The key idea is to predict missing values based on similar profiles.
+
+### 2.1 Problem Formulation
+
+The following slide defines very well problem and the goal of a recommender system:
+
+![Recommender Systems: Problem Formulation](./pics/recommender_systems_problem_furmulation.png)
+
+We have a matrix formed by `items of interest vs. user profiles` (e.g., movies vs. users), and in each cell we have a rating given by each user to the corresponding item. Now, some notions:
+
+- Each user has not rated all the items.
+- An item doesn't need to be been rated by all users.
+- We can expect that similarities between users and between items: for instance, people who like romantic movies, or movies which have romantic content.
+- Thus, we should be able to predict the missing values in the matrix!
+
+Notation:
+
+- `n_u`: number of users (profiles)
+- `n_m`: number of movies (items)
+- `r(i,j)`: `1`, if user `j` has rated movie `i`, `0` otherwise
+- `y^(i,j)`: rating given by user `j` to movie `i`, only if `r(i,j) = 1`
+
+The **goal: estimate missing `y^(i,j)` values**.
+
+In the slide above, we see that we have two clusters of users and movies:
+
+- Users who like romance vs. action.
+- Movies with romance vs. action content.
+
+### 2.2 Content-Based Recommendations
+
+One approach to estimate missing values are the *content-based* recommendations.
 
