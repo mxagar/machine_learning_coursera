@@ -334,7 +334,12 @@ It is called collaborative filtering because all user-movie ratings help collabo
 
 ### 2.4 Collaborative Filtering Algorithm: Low Rank Matrix Factorization
 
-Instead of iteratively computing `theta` and `x` until convergence, we combine both minimization functions a minimize them both together.
+Instead of iteratively computing `theta` and `x` until convergence, we combine both minimization functions a minimize them together. Thus, we end up having a cost function which is the sum of both functions and all parameters `theta` and `x` need to be optimized together so that the estimation of the `y` ratings differs as few as possible from the known values. The optimization algorithm is analog to the previous ones:
+
+![Collaborative Filtering: Combined Cost Function](./pics/collaborative_filtering_combined_cost.png)
+
+![Collaborative Filtering: Combined Cost Function Optimization](./pics/collaborative_filtering_combined_cost_minimization.png)
+
 
 By doing that, we obtain all `theta` and `x` vectors, which can be stacked as rows in `T` and `X`. Then, we know that the approximation of the matrix `Y` is their multiplication!
 
@@ -351,10 +356,24 @@ Y_hat = X * T': n_m x n_u
 this is the estimation of user-movie rating matrix!
 ```
 
-We see that the original matrix `Y` has been factorized to a multiplication of two matrices of lower rank. Thus, this method is called **low rank matrix factorization**. Basically, `X` and `T` are obtained so that the difference between `Y` and `Y_hat` is minimum.
+We see that the original matrix `Y` has been factorized to a multiplication of two matrices of lower rank, which multiplied yield something optimally close to `Y`. Thus, this method is called **low rank matrix factorization**. Basically, `X` and `T` are obtained so that the difference between `Y` and `Y_hat` is minimum.
 
+![Collaborative Filtering: Low Rank Matrix Factorization](./pics/low_rank_matrix_factorization.png)
 
-### Week 9 Forum Question
+### 2.5 Finding Related Movies
+
+Once the `x^(i)` and `theta^(j)` vectors for the minimum cost have been found, we know all the feature vectors of all movies.
+
+Thus, given a movie, we can find its most similar ones simply by taking the closest movies to it in the `n`-dimensional feature space: Finding the 5 most similar movies consits basically in finding the `x^(k)` vectors that give the smallest value
+
+$$\Vert x^{(i)} - x^{(k)}\Vert$$
+
+I understand that something similar could be done with users: we can find similar users!
+
+### 2.6 Missing Columns & Rows in `Y`: Mean Normalization
+
+Something similar can be done with a new movie 
+### 2.7 Week 9 Forum Question
 
 #### Title
 
@@ -366,5 +385,8 @@ In the collaborative filtering section of the recommender systems, w​hen using
 
 Which is the rule of thumb for n? Are there any methods to optimize it? I can image one could choose a large value of n and then apply PCA to the x vectors to find the minimum number of latent parameters necessary for a variance capturing threshold. Then, we would re-compute the parameters of the recommender system with the low rank matrix factorization approach. Is that sensible?
 
+#### Answer
+
+TBD.
 
 
