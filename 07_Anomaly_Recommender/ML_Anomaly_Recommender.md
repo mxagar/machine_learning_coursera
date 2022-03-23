@@ -372,7 +372,28 @@ I understand that something similar could be done with users: we can find simila
 
 ### 2.6 Missing Columns & Rows in `Y`: Mean Normalization
 
-Something similar can be done with a new movie 
+What happens if a new user appears or if a user has not rated any movies yet? We need to initialize his/her `theta` parameter values somehow:
+
+- One approach would be to set them all equal to 0; however, given the minimization problem, they will remain stuck at 0.
+- Another approach is to set them so that the ratings by that person are the mean ratings per movie.
+
+That is achieved by **mean normalization**:
+
+- We substract to each rating the mean rating of the movie (average row-wise): `mu^(i) -> x^(i) = x^(i) - mu^(i)`
+- Then, the rating estimation becomes: `theta^(j)' * x^(i) + mu^(i)`
+- We initialize the `theta^(j)` of the new person `j` to `0`, but the rating formula is not `0` anymore, but the average! That makes possible for the optimization algorithm to update the `theta` values which otherwse would have remained stuck at `0`.
+
+![Mean Normalization](./pics/mean_normalization.png)
+
+Note that
+
+- After the mean substraction the rating mean in the `Y` matrix row-wise is `0` for each movie.
+- Unknown ratings (`?`) remain unchanged always.
+- The `theta` parameter is of dimension `n`; in the slide: `n = 2`.
+- We don't divide by the standard deviation or the range because all values are assumed to be in the same range!
+
+Something similar can be done with a new movie which has not been rated yet; however, it does not make much sense to recommend a movie that was not rated yet, so we can leave it to be populated; meanwhile, its feature vector would be `0` and it would not be recommended -- as I understand.
+
 ### 2.7 Week 9 Forum Question
 
 #### Title
