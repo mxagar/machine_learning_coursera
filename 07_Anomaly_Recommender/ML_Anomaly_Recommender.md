@@ -44,7 +44,7 @@ x ~ N(mu, sigma^2)
 
 The probability of $x$ of belonging tp the Gaussian distribution:
 
-$$p(x; \mu, \sigma^2) = \frac{1}{\sqrt{2\pi} \sigma} \exp{(- \frac{(x-\mu)^2}{2\sigma^2}})$$
+$$p(x; \mu, \sigma^2) = \frac{1}{\sqrt{2\pi} \sigma} \exp{(- \frac{(x-\mu)^2}{2\sigma^2})}$$
 
 ```
 p(x; mu, sigma^2) = (1 / (sqrt(2*pi)*sigma)) * exp(-(x-mu)^2/(2*sigma^2))
@@ -140,14 +140,49 @@ For example: let's image that in a data-center a computer can get unresponsive d
 
 The univariate model built until now assumes that the features are independent from one another. However, when correlations between features are not negligible (which is usually the case), the model does not capture correctly the multi-dimensional distribution, and thus, the predicted `p` values are not correct.
 
-What is happening is that instead of having skewed and stretched bell-shapes, as we should, we have blobby and round curves, which do not capture the real distribution.
+What is happening is that instead of having skewed, rotated and stretched bell-shapes, as we should, we have blobby and round curves, which do not capture the underlying distribution.
 
 ![Multivariate Gaussian: Motivation](./pics/multivariate_gaussian_motivation.png)
 
 In such cases, instead of using a univariate Gaussian distribution obtained after multiplying supposedly independent Gaussians, it is better to use the **Mulivariate Gaussian** distribution, which is not a product, but a multivariate function:
 
-...
+$x \in \mathbf{R}^n \rightarrow p(x) \in \mathbf{R}$
 
-Note the **covariance matrix**
+Parameters: 
 
-...
+- Vectorial mean: $\mu \in \mathbf{R}^n$
+- Covariance matrix: $\Sigma \in \mathbf{R}^{n\times n}$
+
+$$p(x; \mu, \Sigma) = \frac{1}{(2\pi)^{n/2} \vert\Sigma\vert^{1/2}} \exp{(- \frac{1}{2} (x-\mu)^T \Sigma^{-1}(x-\mu) )}$$
+
+```
+p(x; mu, Sigma) = (1 / ((2*pi)^(n/2)*sqrt(det(Sigma)))) * exp(-(x-mu)^T * inv(Sigma)^2 * (x-mu))
+```
+
+Note that the **covariance matrix** $\Sigma \in \mathbf{R}^{n \times n}$ is symmetric. As examples, with `n = 2`, it has this form:
+
+```
+Sigma = [s_11 s_12; s_21 s_22]
+s_11: variance of feature x_1
+s_22: variance of feature x_2
+s_12 = s_21: covariance of features x_1 & x_2
+
+x = [x_1 x_2]' (column)
+Sigma = sum(x * x', i = 1:m)
+```
+
+The covariance matrix has these properties:
+
+- It is symmetric, i.e. `s_ij = s_ji if i != j`.
+- Only if two features `x_i` and `x_j` are correlated is `s_ij !=0`, otherwise, Sigma is diagonal.
+- It must be invertible to use it in our model, i.e., it must have non-zero determinant; a requirement for that is `m > n`.
+- The mean vector `mu` is the point around which the Gaussiean is centered
+- The diagonal values `s_jj` denote the stretch of the Gaussian in each axis `j`; the biggest value yields proportionally the biggest stretch.
+- The non-diagonal values `s_ij` denote the stretch in the direction/axis which is combination of both `i & j`; the sign denotes the sign of the slope.
+- The non-diagonal values `s_ij` are related to the correlation between variables `x_i` and `x_j`:
+
+`corr(x_1, x_2) = s_12 / sqrt(s_11*s_22)`
+
+
+![Covariance Matrix: Examples](./pics/covariance_matrix_examples.png)
+
