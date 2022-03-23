@@ -334,5 +334,37 @@ It is called collaborative filtering because all user-movie ratings help collabo
 
 ### 2.4 Collaborative Filtering Algorithm: Low Rank Matrix Factorization
 
-Instead of 
+Instead of iteratively computing `theta` and `x` until convergence, we combine both minimization functions a minimize them both together.
+
+By doing that, we obtain all `theta` and `x` vectors, which can be stacked as rows in `T` and `X`. Then, we know that the approximation of the matrix `Y` is their multiplication!
+
+```
+T = [theta^(1)'; ...; theta^(n_u)']: n_u x n
+theta^(j): n x 1
+
+X = [x^(1)'; ...; x^(n_m)']: n_m x n
+theta^(j): n x 1
+
+y^(i,j) ~ y_hat^(i,j) = theta^(i)' * x^(j)
+
+Y_hat = X * T': n_m x n_u
+this is the estimation of user-movie rating matrix!
+```
+
+We see that the original matrix `Y` has been factorized to a multiplication of two matrices of lower rank. Thus, this method is called **low rank matrix factorization**. Basically, `X` and `T` are obtained so that the difference between `Y` and `Y_hat` is minimum.
+
+
+### Week 9 Forum Question
+
+#### Title
+
+Collaborative filtering: How do we select the size of the feature & parameter vector learned automatically?
+
+#### Question
+
+In the collaborative filtering section of the recommender systems, w​hen using the low rank matrix factorization approach for obtaining the user parameters (theta) and movie features (x), we assume tha both are of size n x 1; however, no typical range of values is suggested for n. Certainly, it could be something related to n_u (number of users) and n_m (number of movies), but these values are expected to change over time.
+
+Which is the rule of thumb for n? Are there any methods to optimize it? I can image one could choose a large value of n and then apply PCA to the x vectors to find the minimum number of latent parameters necessary for a variance capturing threshold. Then, we would re-compute the parameters of the recommender system with the low rank matrix factorization approach. Is that sensible?
+
+
 
