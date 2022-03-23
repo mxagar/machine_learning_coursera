@@ -292,8 +292,47 @@ Then, the cost function and the optimization with gradient descent is defined in
 
 ![Content-Based Recommender System: Cost Minimization](./pics/recommender_cont_based_cost_minimization.png)
 
+Note that with the parameters `theta` we all all necessary information to estimate the missing values `y^(i,j)`.
+
 ### 2.3 Collaborative Filtering
 
+From the content-based approach, we can see we have three main components:
 
+- The matrix: user ratings of movies: `y^(i,j)`
+- Movie feature vectors: `x^(i)`
+- The parameter vector of each user: `theta^(j)`
 
+Then, the estimation/prediction of a movie rating is:
+
+`y_hat = theta^(j)' * x^(i) ~ y^(i,j)`.
+
+In the content-based approach:
+
+- given the movies feature vectors `x^(i)`, 
+- we obtained the user parameter vector `theta^(j)`.
+
+Now, we do it the other way around: If all users fill in a form with their genre preferences, we have `theta^(j)`, thus we can optimize the cost function (difference between `y` and its estimation) to obtain the movies feature vectors `x^(i)`!
+
+Then, the cost minimization is transformed as if `x` were the parameter to be learned, instead of `theta`:
+
+![Collaborative Filtering: Cost Minimization](./pics/collaborative_filtering_cost_minimization.png)
+
+Solving that minimization function with gradient descent leads to `x`.
+
+Again, we end up having all information to estimate all missing `y^(i,j)`.
+
+However, **collaborative filtering** goes one step beyond: we work only with the incomplete matrix of ratings `y^(i,j)` and without `x^(i)` or `theta^(j)`. User parameters and movie feature vectors are obtained in the process.
+
+One naive approach for collaborative filtering would be:
+
+1. Guess `theta^(j)`
+2. Obtain `x^(i)` by minimizing the cost function above: `theta^(j)` and `y^(i,j)` are used
+3. Re-compute `theta^(j)` according to the cost function in the content-based approach: `x^(i)` and `y^(i,j)` are used.
+4. Repeat steps 2 and 3 until we converge.
+
+It is called collaborative filtering because all user-movie ratings help collaborative creating a model.
+
+### 2.4 Collaborative Filtering Algorithm: Low Rank Matrix Factorization
+
+Instead of 
 
