@@ -256,5 +256,44 @@ In the slide above, we see that we have two clusters of users and movies:
 
 ### 2.2 Content-Based Recommendations
 
-One approach to estimate missing values are the *content-based* recommendations.
+One approach to estimate missing values are the *content-based* recommendations. This assumes we have feature vectors of the items/movies, related to their content, e.g., degree of romance, action, etc. That is the major disadvantage of the approach: we need to have feature vectors!
+
+Given those feature vectors, linear regression is performed across all movies and all users so that each user gets a parameter vector `theta`. Thus, given a movie with a feature vector `x`, the estimated rating of a user of that movie is `theta*x`.
+
+![Content-Based Recommender Systems](./pics/content_based_parameters.png)
+
+The key concepts are:
+- Each movie `i` has its own feature vector `x^(i)`, with `n` features and `x_0 = 1`, so size `n + 1`. Each element in `x` is how much the movie is aligned with a feature (e.g., it has romance, action, etc.).
+- Each user `j` gets a parameter vector `theta^(j)`. Each element of `theta` is the importance given by the user to each feature (e.g., it has romance, action, etc.).
+- `r(i,j) = 1` when a user `j` has rated movie `i` with `y^(i,j)`; the total movies rated by a user is `m^(j)`.
+
+The estimation of a movie `i` rating by user `j` will be:
+
+```
+y_hat = (theta^(j))' *
+
+theta^(j): (n + 1) x 1; one for each user j = 1:n_u
+x^(i): (n + 1) x 1; one for ach movie i = 1:n_m
+```
+
+While the real rating is:
+
+```
+y^(i,j), if r(i,j) = 1
+```
+
+With that, usual linear regression can be applied, even regularized, and an optimization algorithm of any kind (e.g., gradient descent) can be used, because the cost function `J` and its derivative are known. 
+
+The cost function is the sum of squared differences `y_hat - y` over all movies `i` and users `j` if `r(i,j) = 1`. In a regular linear regression, we would have normalized the sum with `m^(j)`, but here we drop it.
+
+Then, the cost function and the optimization with gradient descent is defined in the following slides:
+
+![Content-Based Recommender System: Cost Function](./pics/recommender_cont_based_cost.png)
+
+![Content-Based Recommender System: Cost Minimization](./pics/recommender_cont_based_cost_minimization.png)
+
+### 2.3 Collaborative Filtering
+
+
+
 
