@@ -360,6 +360,8 @@ We see that the original matrix `Y` has been factorized to a multiplication of t
 
 ![Collaborative Filtering: Low Rank Matrix Factorization](./pics/low_rank_matrix_factorization.png)
 
+Note: in this approach, `x_0 = 0` and `theta_0 = 0`, in other words: they are not considered; the algorithm itself learns whether any parameter/feature `= 1` is necessary.
+
 ### 2.5 Finding Related Movies
 
 Once the `x^(i)` and `theta^(j)` vectors for the minimum cost have been found, we know all the feature vectors of all movies.
@@ -381,33 +383,48 @@ That is achieved by **mean normalization**:
 
 - We substract to each rating the mean rating of the movie (average row-wise): `mu^(i) -> x^(i) = x^(i) - mu^(i)`
 - Then, the rating estimation becomes: `theta^(j)' * x^(i) + mu^(i)`
-- We initialize the `theta^(j)` of the new person `j` to `0`, but the rating formula is not `0` anymore, but the average! That makes possible for the optimization algorithm to update the `theta` values which otherwse would have remained stuck at `0`.
+- If we initialize the `theta^(j)` of the new person `j` to `0`, the rating formula is not `0` anymore, but the average! That makes possible for the optimization algorithm to update the `theta` values which otherwise would have remained stuck at `0`.
 
 ![Mean Normalization](./pics/mean_normalization.png)
 
 Note that
 
 - After the mean substraction the rating mean in the `Y` matrix row-wise is `0` for each movie.
-- Unknown ratings (`?`) remain unchanged always.
+- Unknown ratings (denoted with `?`) remain unchanged always.
 - The `theta` parameter is of dimension `n`; in the slide: `n = 2`.
 - We don't divide by the standard deviation or the range because all values are assumed to be in the same range!
+- I understand we should not initialize `theta` or `x` values with `0`; instead, with small random values? Is that so?
 
 Something similar can be done with a new movie which has not been rated yet; however, it does not make much sense to recommend a movie that was not rated yet, so we can leave it to be populated; meanwhile, its feature vector would be `0` and it would not be recommended -- as I understand.
 
 ### 2.7 Week 9 Forum Question
 
-#### Title
+#### Question 1
+
+##### Title
 
 Collaborative filtering: How do we select the size of the feature & parameter vector learned automatically?
 
-#### Question
+##### Question
 
 In the collaborative filtering section of the recommender systems, w​hen using the low rank matrix factorization approach for obtaining the user parameters (theta) and movie features (x), we assume tha both are of size n x 1; however, no typical range of values is suggested for n. Certainly, it could be something related to n_u (number of users) and n_m (number of movies), but these values are expected to change over time.
 
 Which is the rule of thumb for n? Are there any methods to optimize it? I can image one could choose a large value of n and then apply PCA to the x vectors to find the minimum number of latent parameters necessary for a variance capturing threshold. Then, we would re-compute the parameters of the recommender system with the low rank matrix factorization approach. Is that sensible?
 
-#### Answer
+##### Answer
 
 TBD.
 
+#### Question 2
 
+##### Title
+
+Initialisation of User Parameters and Movie Features
+
+##### Question
+
+M​ean normalization seems to prevent the fact that if user parameters (theta) or movie features (x) are initialized to 0, they get stuck and no optimization updates occur. However, is it agood practice to initialize them to 0? Isn't it instead a better practice to initialize them to small rrandom values? If so, how necessary is mean normalization?
+
+##### Answer
+
+TBD.
