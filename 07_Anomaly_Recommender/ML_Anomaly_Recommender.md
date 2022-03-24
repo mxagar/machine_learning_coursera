@@ -23,7 +23,14 @@ Overview of contents:
    - 1.8 Anomaly Detection using the Multivariate Gaussian Distribution
    - 1.9 Univariate vs. Multivariate Gaussians
 2. Recommender Systems
-
+   - 2.1 Problem Formulation
+   - 2.2 Content-Based Recommendations
+   - 2.3 Collaborative Filtering
+   - 2.4 Collaborative Filtering Algorithm: Low Rank Matrix Factorization
+   - 2.5 Finding Related Movies
+   - 2.6 Missing Columns & Rows in `Y`: Mean Normalization
+   - 2.7 Week 9 Forum Questions
+3. Exercise 8: Anomaly Detection and Recommender Systems
 
 
 ## 1. Anomaly Detection
@@ -397,7 +404,7 @@ Note that
 
 Something similar can be done with a new movie which has not been rated yet; however, it does not make much sense to recommend a movie that was not rated yet, so we can leave it to be populated; meanwhile, its feature vector would be `0` and it would not be recommended -- as I understand.
 
-### 2.7 Week 9 Forum Question
+### 2.7 Week 9 Forum Questions
 
 #### Question 1
 
