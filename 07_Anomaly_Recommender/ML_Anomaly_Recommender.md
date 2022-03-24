@@ -413,7 +413,7 @@ Which is the rule of thumb for n? Are there any methods to optimize it? I can im
 
 ##### Answer
 
-TBD.
+No rule of thumb, just experimentation. Try it and report.
 
 #### Question 2
 
