@@ -208,7 +208,7 @@ The algorithm is basically the same:
 
 ### 1.9 Univariate vs. Multivariate Gaussians
 
-It can be shown that the Univariate Gaussian is the Multivariate Gaussian when the latter is axis aligned, i.e., the covariance matrix diagonal.
+It can be shown that **the Univariate Gaussian is the Multivariate Gaussian when the latter is axis aligned, i.e., the covariance matrix diagonal.**
 
 Therefore, if we have correlations between features, the univariate Gaussian will not capture them, unless we introduce them as new features, e.g., `x_3 = x_1 / x2`.
 
