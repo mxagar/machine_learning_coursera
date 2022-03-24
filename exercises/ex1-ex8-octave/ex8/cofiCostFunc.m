@@ -40,20 +40,45 @@ Theta_grad = zeros(size(Theta));
 %                     partial derivatives w.r.t. to each element of Theta
 %
 
+Y_hat = X*Theta';
+% Option 1
+%D = Y_hat(R==1) - Y(R==1);
+%J = (1.0/2.0) * D'*D;
+% Option 2
+D = Y_hat.*R - Y.*R;
+J = (1.0/2.0) * sum(sum(D.*D));
 
+for i=1:num_movies
+    idx = find(R(i,:)==1); % users that have rated movie i
+    Theta_tmp = Theta(idx,:); % |idx:users-i| x n
+    Y_tmp = Y(i,idx); % 1 x |idx:users-i|
+    % (1 x n) x (n x |idx:users-i|) x (|idx:users-i| x n) = 1 x n
+    X_grad(i,:) = (X(i,:)*Theta_tmp'-Y_tmp)*Theta_tmp;
+end
 
+for j=1:num_users
+    idx = find(R(:,j)==1); % movies that user j has rated
+    X_tmp = X(idx,:); % |idx:movies-j| x n
+    Y_tmp = Y(idx,j); % |idx:movies-j| x 1
+    % (|idx:movies-j| x n) x (n x 1) = |idx:movies-j| x 1 -> 1 x |idx:movies-j|
+    Theta_grad(j,:) = (X_tmp*Theta(j,:)'-Y_tmp)'*X_tmp;
+end
 
+% Cost Regularization
+X_reg = 0.5*lambda*sum(sum(X.*X));
+Theta_reg = 0.5*lambda*sum(sum(Theta.*Theta));
+J = J + X_reg + Theta_reg;
 
-
-
-
-
-
-
-
-
-
-
+% Gradient: Regularization Terms
+% We could insert these in the loops above, 
+% but I leave them here for clarity
+% and to keep the chronology of additions
+for i=1:num_movies
+    X_grad(i,:) = X_grad(i,:) + lambda*X(i,:);
+end
+for j=1:num_users
+    Theta_grad(j,:) = Theta_grad(j,:) + lambda*Theta(j,:);
+end
 
 % =============================================================
 
