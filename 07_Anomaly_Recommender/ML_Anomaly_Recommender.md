@@ -301,6 +301,8 @@ Then, the cost function and the optimization with gradient descent is defined in
 
 Note that with the parameters `theta` we all all necessary information to estimate the missing values `y^(i,j)`.
 
+Important notation note: **`i:r(i,j) = 1` means over all values of `i` where `r(i,j) = 1`, in other words, over all movies, taking all ratings.**
+
 ### 2.3 Collaborative Filtering
 
 From the content-based approach, we can see we have three main components:
@@ -430,8 +432,312 @@ Initialisation of User Parameters and Movie Features
 
 ##### Question
 
-M​ean normalization seems to prevent the fact that if user parameters (theta) or movie features (x) are initialized to 0, they get stuck and no optimization updates occur. However, is it agood practice to initialize them to 0? Isn't it instead a better practice to initialize them to small rrandom values? If so, how necessary is mean normalization?
+M​ean normalization seems to prevent the fact that if user parameters (theta) or movie features (x) are initialized to 0, they get stuck and no optimization updates occur. However, is it a good practice to initialize them to 0? Isn't it instead a better practice to initialize them to small random values? If so, how necessary is mean normalization?
 
 ##### Answer
 
-TBD.
+No useful answer provided. They though I was mixing normalization and random initialization.
+
+## 3. Exercise 8: Anomaly Detection and Recommender Systems
+
+In this exercise, has two major parts:
+1. Anomaly detection to detect failing servers on a network.
+2. Recommender system based on collaborative filtering to predict a movie ratings.
+
+Files provided by Coursera, located under `../exercises/ex1-ex8-octave/ex8`
+
+- `ex8.m` - Octave/MATLAB script for first part of exercise
+- `ex8_cofi.m` - Octave/MATLAB script for second part of exercise
+- `ex8data1.mat` - First example Dataset for anomaly detection
+- `ex8data2.mat` - Second example Dataset for anomaly detection
+- `ex8_movies.mat` - Movie Review Dataset
+- `ex8_movieParams.mat` - Parameters provided for debugging
+- `multivariateGaussian.m` - Computes the probability density function for a Gaussian distribution
+- `visualizeFit.m` - 2D plot of a Gaussian distribution and a dataset
+- `checkCostFunction.m` - Gradient checking for collaborative filtering
+- `computeNumericalGradient.m` - Numerically compute gradients
+- `fmincg.m` - Function minimization routine (similar to fminunc)
+- `loadMovieList.m` - Loads the list of movies into a cell-array
+- `movie_ids.txt` - List of movies
+- `normalizeRatings.m` - Mean normalization for collaborative filtering
+- `submit.m` - Submission script that sends your solutions to our servers
+
+Files to complete:
+
+- `estimateGaussian.m` - Estimate the parameters of a Gaussian ditribution with a diagonal covariance matrix
+- `selectThreshold.m` - Find a threshold for anomaly detection
+- `cofiCostFunc.m` - Implement the cost function for collaborative filtering
+
+Workflow:
+
+- Download latest Octave version of exercise from Coursera
+- Complete code in exercise files following `ex8.pdf`
+- Whenever an exercise part is finished
+  - Check it with `ex8` and `ex8_cofi` in Octave terminal
+  - Create a submission token on Coursera (exercise submission page, it lasts 30 minutes)
+  - Execute `submit` in Octave terminal
+  - Introduce email and token
+  - Results appear
+
+**Overview of contents:**
+
+0. Setup: `gnuplot`
+1. Dataset Loading & Visualization
+2. Anomaly Detection - `ex8.m`
+    - 2.1 Gaussian Distribution: Parameters - `estimateGaussian.m`
+    - 2.2 Selecting the Threshold `epsilon` - `selectThreshold.m`
+3. Recommender Systems - `ex8_cofi.m`
+   - 3.1 Collaborative Filtering - `cofiCostFunc.m`
+     - 3.1.1 Cost Function without Regularization
+     - 3.1.2 Cost Function Gradient without Regularization
+     - 3.1.3 Cost Function with Regularization
+     - 3.1.4 Cost Function Gradient with Regularization
+   - 3.2 Train and Test the Model (Ungraded, Taken from `ex_cofi.m`)
+     - Set Ratings
+     - Load Data & Optimize Model Parameters
+     - Estimate Ratings with Model
+
+The anomaly detection exercise is very easy; the recommender system exercise is quite easy, but the computation of the cost gradient was a little bit tricky. Look at the exercise guide PDF and my notes:
+
+`./RecommenderSystems_Notes.pdf`
+
+Python implementation notes:
+
+- The optimization performed by `fmincg` can be done with `scipy.optimize.minimize` in python; see previous exercises (e.g., linear regression, logistic regression).
+- Finding the ids where `R(i,j) = 1` can be done with `idx = np.where(R[i, :] == 1)[0]; Theta_temp = Theta[idx, :]`.
+- The unrolling of matrices can be done with `Theta.ravel()`.
+
+In the following, the most important code pieces of the exercise are added. Interesting formulas and the application/tests of the exercises are in the notebook -- have a look if interested!
+
+```octave
+
+%%% --- 2. Anomaly Detection - `ex8.m`
+
+function [mu sigma2] = estimateGaussian(X)
+    % [mu sigma2] = estimateGaussian(X), 
+    % The input X is the dataset with each n-dimensional data point in one row
+    % The output is an n-dimensional vector mu, the mean of the data set
+    % and the variances sigma^2, an n x 1 vector
+
+    % Useful variables
+    [m, n] = size(X);
+
+    % You should return these values correctly
+    mu = zeros(n, 1);
+    sigma2 = zeros(n, 1);
+
+    mu = mean(X)';
+    sigma2 = var(X,1)'; % normalize using (m-1) instead of m
+end
+
+function [bestEpsilon bestF1] = selectThreshold(yval, pval)
+    % [bestEpsilon bestF1] = SELECTTHRESHOLD(yval, pval) finds the best
+    % threshold to use for selecting outliers based on the results from a
+    % validation set (pval) and the ground truth (yval).
+
+    bestEpsilon = 0;
+    bestF1 = 0;
+    F1 = 0;
+
+    stepsize = (max(pval) - min(pval)) / 1000;
+    for epsilon = min(pval):stepsize:max(pval)
+    
+        cvPredictions = (pval < epsilon); % 1 if anomaly: p < epsilon!
+
+        tp = sum((cvPredictions == yval) & (yval == 1));
+        tn = sum((cvPredictions == yval) & (yval == 0));
+        fp = sum((cvPredictions != yval) & (yval == 0));
+        fn = sum((cvPredictions != yval) & (yval == 1));
+
+        precision = tp / (tp + fp);
+        recall = tp / (tp + fn);
+        F1 = 2*precision*recall / (precision+recall);
+
+        if F1 > bestF1
+           bestF1 = F1;
+           bestEpsilon = epsilon;
+        end
+    end
+
+end
+
+% Compute the model
+[mu sigma2] = estimateGaussian(X);
+p = multivariateGaussian(X, mu, sigma2);
+
+% Find the outliers in the training set and plot the
+outliers = find(p < epsilon);
+%outliers = find(p < 1.5e-2);
+
+% Plot the ooutliers
+visualizeFit(X,  mu, sigma2);
+xlabel('Latency (ms)');
+ylabel('Throughput (mb/s)');
+hold on;
+plot(X(outliers, 1), X(outliers, 2), 'ro', 'LineWidth', 2, 'MarkerSize', 10);
+hold off;
+
+%%% --- 3. Recommender Systems - `ex8_cofi.m`
+
+function [J, grad] = cofiCostFunc_(params, Y, R, num_users, num_movies, ...
+                                   num_features, lambda)
+    % [J, grad] = COFICOSTFUNC(params, Y, R, num_users, num_movies, ...
+    % num_features, lambda) returns the cost and gradient for the
+    % collaborative filtering problem.
+
+    % Unfold the U and W matrices from params
+    X = reshape(params(1:num_movies*num_features), num_movies, num_features);
+    Theta = reshape(params(num_movies*num_features+1:end), num_users, num_features);
+
+    % You need to return the following values correctly
+    J = 0;
+    X_grad = zeros(size(X));
+    Theta_grad = zeros(size(Theta));
+
+    % We factorize Y to X and Theta:
+    % X: movie features: num_movies x n
+    % Theta: user weights for movie features: num_users x n
+    % Y: num_movies x num_users: ratings
+    % R: num_movies x num_users: R(i,j) = 1 if there is a rating in Y, 0 otherwise
+    % n: number of features -> chosen to be 100
+    % i: movie counter: 1:num_movies
+    % j: user counter: 1:num_users
+
+    Y_hat = X*Theta';
+    % Option 1
+    %D = Y_hat(R==1) - Y(R==1);
+    %J = (1.0/2.0) * D'*D;
+    % Option 2
+    D = Y_hat.*R - Y.*R;
+    J = (1.0/2.0) * sum(sum(D.*D));
+
+    % X_grad: num_movies x n: dJ/dX, all elements of X
+    % Theta_grad: num_users x n: dJ/dTheta, all elements of Theta
+    
+    % Notes on notation:
+    % k = 1:n (features), num_features
+    % x_k^{(i)}: row i and column k, i.e., movie i and feature k
+    % theta_k^{(j)}: row j and column k, i.e., user j and feature k
+    % j:r(i,j)=1: over all j values where r(i,j)=1
+    
+    # Gradients: dJ/dX, dJ/dTheta
+    for i=1:num_movies
+        idx = find(R(i,:)==1); % users that have rated movie i
+        Theta_tmp = Theta(idx,:); % |idx:users-i| x n
+        Y_tmp = Y(i,idx); % 1 x |idx:users-i|
+        % (1 x n) x (n x |idx:users-i|) x (|idx:users-i| x n) = 1 x n
+        X_grad(i,:) = (X(i,:)*Theta_tmp'-Y_tmp)*Theta_tmp;
+    end
+
+    for j=1:num_users
+        idx = find(R(:,j)==1); % movies that user j has rated
+        X_tmp = X(idx,:); % |idx:movies-j| x n
+        Y_tmp = Y(idx,j); % |idx:movies-j| x 1
+        % (|idx:movies-j| x n) x (n x 1) = |idx:movies-j| x 1 -> 1 x |idx:movies-j|
+        Theta_grad(j,:) = (X_tmp*Theta(j,:)'-Y_tmp)'*X_tmp;
+    end
+    
+    % Cost Regularization
+    X_reg = 0.5*lambda*sum(sum(X.*X));
+    Theta_reg = 0.5*lambda*sum(sum(Theta.*Theta));
+    J = J + X_reg + Theta_reg;
+
+    % Gradient: Regularization Terms
+    % We could insert these in the loops above, 
+    % but I leave them here for clarity
+    % and to keep the chronology of additions
+    for i=1:num_movies
+        X_grad(i,:) = X_grad(i,:) + lambda*X(i,:);
+    end
+    for j=1:num_users
+        Theta_grad(j,:) = Theta_grad(j,:) + lambda*Theta(j,:);
+    end
+
+    % Pack the results: unroll!
+    grad = [X_grad(:); Theta_grad(:)];
+
+end
+
+%% Testing
+
+%  Initialize my ratings
+my_ratings = zeros(1682, 1);
+
+% Check the file movie_idx.txt for id of each movie in our dataset
+% For example, Toy Story (1995) has ID 1, so to rate it "4", you can set
+my_ratings(1) = 4;
+
+% Or suppose did not enjoy Silence of the Lambs (1991), you can set
+my_ratings(98) = 2;
+
+% We have selected a few movies we liked / did not like and the ratings we
+% gave are as follows:
+my_ratings(7) = 3;
+my_ratings(12)= 5;
+my_ratings(54) = 4;
+my_ratings(64)= 5;
+my_ratings(66)= 3;
+my_ratings(69) = 5;
+my_ratings(183) = 4;
+my_ratings(226) = 5;
+my_ratings(355)= 5;
+
+% Load data
+% Y is a 1682x943 matrix, containing ratings (1-5) of 1682 movies by 943 users
+% R is a 1682x943 matrix, where R(i,j) = 1 if and only if user j gave a rating to movie i
+load('ex8_movies.mat');
+
+% Add our own ratings to the data matrix
+Y = [my_ratings Y];
+R = [(my_ratings ~= 0) R];
+
+% Normalize Ratings
+[Ynorm, Ymean] = normalizeRatings(Y, R);
+
+% Useful Values
+num_users = size(Y, 2);
+num_movies = size(Y, 1);
+num_features = 10;
+
+% Set Initial Parameters (Theta, X)
+X = randn(num_movies, num_features);
+Theta = randn(num_users, num_features);
+
+initial_parameters = [X(:); Theta(:)];
+
+% Set options for fmincg
+options = optimset('GradObj', 'on', 'MaxIter', 100);
+
+% Set Regularization
+lambda = 10;
+theta = fmincg (@(t)(cofiCostFunc(t, Ynorm, R, num_users, num_movies, ...
+                                num_features, lambda)), ...
+                initial_parameters, options);
+
+% Unfold the returned theta back into U and W
+X = reshape(theta(1:num_movies*num_features), num_movies, num_features);
+Theta = reshape(theta(num_movies*num_features+1:end), ...
+                num_users, num_features);
+
+p = X * Theta';
+my_predictions = p(:,1) + Ymean;
+
+movieList = loadMovieList();
+
+[r, ix] = sort(my_predictions, 'descend');
+fprintf('\nTop recommendations for you:\n');
+for i=1:10
+    j = ix(i);
+    fprintf('Predicting rating %.1f for movie %s\n', my_predictions(j), ...
+            movieList{j});
+end
+
+fprintf('\n\nOriginal ratings provided:\n');
+for i = 1:length(my_ratings)
+    if my_ratings(i) > 0 
+        fprintf('Rated %d for %s\n', my_ratings(i), ...
+                 movieList{i});
+    end
+end
+
+```
