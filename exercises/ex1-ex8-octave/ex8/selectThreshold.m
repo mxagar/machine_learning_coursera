@@ -23,17 +23,16 @@ for epsilon = min(pval):stepsize:max(pval)
     % Note: You can use predictions = (pval < epsilon) to get a binary vector
     %       of 0's and 1's of the outlier predictions
 
+    cvPredictions = (pval < epsilon); % 1 if anomaly: p < epsilon!
 
+    tp = sum((cvPredictions == yval) & (yval == 1));
+    tn = sum((cvPredictions == yval) & (yval == 0));
+    fp = sum((cvPredictions != yval) & (yval == 0));
+    fn = sum((cvPredictions != yval) & (yval == 1));
 
-
-
-
-
-
-
-
-
-
+    precision = tp / (tp + fp);
+    recall = tp / (tp + fn);
+    F1 = 2*precision*recall / (precision+recall);
 
     % =============================================================
 
