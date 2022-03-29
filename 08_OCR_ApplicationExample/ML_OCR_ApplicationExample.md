@@ -13,6 +13,10 @@ An alternative would be to use Asciidoc, but rendering of equations is not strai
 Overview of contents:
 
 1. Application Example: Photo OCR
+   - 1.1 Problem Description and Pipeline
+   - 1.2 Sliding Windows Classifiers
+   - 1.3 Getting Lots of Data and Artificial Data
+   - 1.4 Ceiling Analysis: What Part of the Pipeline to Work on Next
 
 ## 1. Application Example: Photo OCR
 
