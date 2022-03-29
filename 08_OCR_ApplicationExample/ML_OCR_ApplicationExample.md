@@ -94,7 +94,20 @@ If we have a low bias model, always consider the effort of obtaining `10x` data;
 
 Manual labelling is also something we need to consider -- compute the required hours and consider the cost-benefit tradeoff! Also, there are platforms that offer
 
-> crowdsourcing marketplaces that make it easier for individuals and businesses to outsource their processes and jobs to a distributed workforce who can perform these tasks virtually. [Amazon Mechanical Turk](https://www.mturk.com)
+> crowdsourcing marketplaces that make it easier for individuals and businesses to outsource their processes and jobs to a distributed workforce who can perform these tasks virtually. [Amazon Mechanical Turk](https://www.mturk.com).
 
 ### 1.4 Ceiling Analysis: What Part of the Pipeline to Work on Next
 
+Ceiling analysis consists in detecting the upper bound improvement we would obtain if a component in the pipeline is enhanced. Thanks to that analysis, we can allocate our limited engineering resources accordingly.
+
+First, the basis performance of the ML system is measured with one metric (e.g., accuracy, F1, etc.). Then, we replace the output of each component of the pipeline with ground truth data in sequence: first components, second component, etc. After each replacement, we compute the improvement in the system performance. That way, we can rank the priorities according to the enhancement we could obtain.
+
+The take-home message is: do not trust your intuition that much; instead, test the maximum real improvement we could get optimizing each component and target the one that provides the largest delta!
+
+An example with the photo OCR application is given in this slide:
+
+![Ceiling Analysis: OCR](./pics/ceiling_analysis_ocr.png)
+
+Another example for  the application of face recognition (probably with an over-complicated pipeline):
+
+![Ceiling Analysis: Face Recognition](./pics/ceiling_analysis_face_recognition.png)
