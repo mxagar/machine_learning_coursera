@@ -67,3 +67,34 @@ Once the bounding boxes of the text strings are defined, a sliding window is swe
 Thus, we get the location of text strings and segmented character patches. Now, we can apply a classifier on them.
 
 ### 1.3 Getting Lots of Data and Artificial Data
+
+The best approach in machine learning is:
+
+- take a low bias model (enough features)
+- regularize it (to prevent overfitting)
+- train it on a massive dataset (to prevent overfitting while assuring generalization).
+
+However, obtaining large datasets is difficult and expensive. An alternative is to augment or amplify the smaller dataset we have collected.
+
+In the case of text, we can generate artificial text strings with random fonts on random and varied backgrounds.
+
+![Synthetic Text Data](./pics/synthetic_text_data.png)
+
+Additionally, we can add:
+
+- rotations,
+- noise,
+- deformations: warpings, distortions.
+  
+However, make sure you consider reasonable alteration for each specific case: meaningless noise and deformations don't help really. Rather, we should add noise and alterations that mimic what could happen in the reality.
+
+Recall that, first and foremost, we should have a low bias model. That can be checked by plotting `J_train` and `J_cv` with some examples: if both curves converge fast, we have a high bias and we need to add more features or increase hidden units; if not, we have a low bias model and we could start getting or generating more data.
+
+If we have a low bias model, always consider the effort of obtaining `10x` data; it can dramatically improve the model efficiency!
+
+Manual labelling is also something we need to consider -- compute the required hours and consider the cost-benefit tradeoff! Also, there are platforms that offer
+
+> crowdsourcing marketplaces that make it easier for individuals and businesses to outsource their processes and jobs to a distributed workforce who can perform these tasks virtually. [Amazon Mechanical Turk](https://www.mturk.com)
+
+### 1.4 Ceiling Analysis: What Part of the Pipeline to Work on Next
+
