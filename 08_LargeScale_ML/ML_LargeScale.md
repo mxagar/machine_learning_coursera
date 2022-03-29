@@ -17,6 +17,8 @@ Overview of contents:
    - 1.2 Mini-Batch Gradient Descent
    - 1.3 Stochastic Gradient Descent Convergence
 2. Advanced Topics
+   - 2.1 Online Learning
+   - 2.2 Map Reduce and Data Parallelism
 
 ## 1. Gradient Descent with Large Datasets
 
